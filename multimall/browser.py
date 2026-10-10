@@ -92,6 +92,7 @@ _REVIEW_EXTRACT = r"""
   }
   return {rows, page_title: document.title, page_url: location.href};
 }
+"""
 
 class ReadOnlyBrowser:
     def __init__(self, profile_dir: str | None = None) -> None:
