@@ -169,18 +169,48 @@ def recommend_best_products(products_json: str,
 async def research_purchase(keyword: str, budget_yuan: float | None = None,
                             platforms_json: str = '["taobao","jd","pdd"]',
                             include_secondhand: bool = False,
-                            location: str = "", per_platform_limit: int = 8) -> dict[str, Any]:
-    """One-call shopping research: live search -> provenance -> conservative shortlist.
+                            location: str = "", per_platform_limit: int = 8,
+                            inspect_reviews_top_k: int = 0) -> dict[str, Any]:
+    """One-call shopping research: search -> provenance -> provisional shortlist.
 
-    No reviews or seller quality can be inferred from a result card.
-    If no evidence appears, tool reports needs_more_evidence instead of picking goods.
+    Optionally (inspect_reviews_top_k=1..3) inspect visible review-like DOM text
+    for shortlisted product pages; absent reviews must never become a quality score.
     """
     try:
+        if not 0 <= inspect_reviews_top_k <= 3:
+            raise ValueError("inspect_reviews_top_k 必须是 0-3")
         platforms = json.loads(platforms_json)
-        return await _research_purchase(browser.search, keyword, platforms, budget_yuan,
-                                        include_secondhand, location, per_platform_limit)
+        result = await _research_purchase(browser.search, keyword, platforms, budget_yuan,
+                                          include_secondhand, location, per_platform_limit)
+        if result["status"] == "provisional_results" and inspect_reviews_top_k > 0:
+            for item in result["shortlist"][:inspect_reviews_top_k]:
+                evidence = await get_visible_reviews(item["url"], limit=20)
+                item["review_summary"] = evidence["summary"]
+                item["review_fetch_status"] = evidence["status"]
+            result["quality"] = "limited_visible_review_evidence_not_independently_verified"
+        return result
     except (ValueError, TypeError) as e:
         return {"status": "invalid_input", "reason": str(e)[:320]}
+
+
+
+@mcp.tool()
+async def get_visible_reviews(product_url: str, limit: int = 20) -> dict[str, Any]:
+    """Read visible review-like text and summarize it, without inventing quality scores.
+
+    Review sections requiring login/click/pagination may be unavailable.
+    These are DOM observations, not proof of verified purchase or full review coverage.
+    """
+    try:
+        result = await browser.visible_reviews(product_url, limit)
+        if result.get("status") == "observed":
+            result["summary"] = _analyze_reviews(result["reviews"])
+        else:
+            result["summary"] = _analyze_reviews([])
+        return result
+    except Exception as e:
+        return {"status": "error", "reason": str(e)[:280],
+                "reviews": [], "summary": _analyze_reviews([])}
 
 
 def main() -> None:
