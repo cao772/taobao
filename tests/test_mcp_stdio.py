@@ -23,7 +23,7 @@ def test_stdio_initialize_discovery_and_safe_call():
                     "list_platforms", "search_products", "get_product_detail",
                     "compare_products", "prepare_purchase_review", "close_browser",
                     "search_all_platforms", "match_same_products",
-                    "analyze_product_reviews", "recommend_best_products", "research_purchase",
+                    "analyze_product_reviews", "recommend_best_products", "research_purchase", "get_visible_reviews",
                 } <= names
                 response = await session.call_tool("list_platforms", {})
                 assert not response.isError
