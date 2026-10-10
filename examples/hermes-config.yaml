@@ -1,0 +1,10 @@
+# Merge into ~/.hermes/config.yaml — use a separate profile from Codex.
+mcp_servers:
+  multimall:
+    command: "/ABS/PATH/multimall-mcp/.venv/bin/python"
+    args:
+      - "-m"
+      - "multimall.server"
+    env:
+      MULTIMALL_PROFILE_DIR: "/ABS/PATH/multimall-mcp/.local/hermes-profile"
+      MULTIMALL_HEADLESS: "false"
