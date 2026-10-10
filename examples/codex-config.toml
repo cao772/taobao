@@ -1,0 +1,7 @@
+# ~/.codex/config.toml — replace placeholders with absolute paths.
+[mcp_servers.multimall]
+command = "/ABS/PATH/multimall-mcp/.venv/bin/python"
+args = ["-m", "multimall.server"]
+[mcp_servers.multimall.env]
+MULTIMALL_PROFILE_DIR = "/ABS/PATH/multimall-mcp/.local/codex-profile"
+MULTIMALL_HEADLESS = "false"
