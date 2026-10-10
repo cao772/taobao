@@ -7,13 +7,43 @@
 ## 技术路线
 Codex / Hermes → MultiMall MCP (Python, stdio) → Search/Detail/Compare/Review → Provider Adapters → 合规官方 API + 授权可见浏览器。
 
-## 已实现的 v0.1 工具
+## 已实现的基础工具（v0.1）
 - `list_platforms`：平台能力、未连接状态。
 - `search_products`：只读浏览器候选搜索；若失败，明确返回需要人工搜索。
 - `get_product_detail`：白名单站点页面观察。
 - `compare_products`：对已观察价格排序/过滤，不推测真实结算价。
 - `prepare_purchase_review`：产生人工购物审核单。
 - `close_browser`：关闭专用浏览器。
+
+## v0.2 智能选品引擎（feature/smart-shopping-engine 开发分支）
+
+新增 5 个 MCP 工具：
+
+- `search_all_platforms`：并发搜索多个平台，逐站记录成功/受限/失败，不将空结果当作无货；默认淘宝、京东、拼多多，传入平台列表可包含得物、闲鱼、美团。
+- `match_same_products`：**仅按显式品牌、型号、规格、新旧状态**划分同款候选组，未提供身份字段的结果不强行合并。
+- `analyze_product_reviews`：仅分析已取得的真实评论片段，报告出现的故障、假货疑虑、售后等信号，**不伪造产品质量分**。
+- `recommend_best_products`：基于展示价与可选运费/优惠数据给出待复核候选，不把低价称为最高质量。
+- `research_purchase`：一次调用搜索 → 汇总每平台覆盖状态 → 保守的 TOP 3 候选；评论数据和实际应付价仍须后续核验。
+
+重要：此版本主要完成可运行的编排、接口和证据链；平台网页可能拒绝浏览器读取，商家真实评分、用户评价抓取、官方联盟 API 和支付接口**尚未打通**。工具会明确返回受限状态，而不是伪造价格或评分。
+
+### Codex / Hermes 调用示例
+
+向 MCP 工具 `research_purchase` 输入：
+
+```json
+{
+  "keyword": "ESP32-S3 1.75 AMOLED N16R8",
+  "budget_yuan": 200,
+  "platforms_json": "[\\"taobao\\",\\"jd\\",\\"pdd\\",\\"xianyu\\"]",
+  "include_secondhand": true,
+  "per_platform_limit": 8
+}
+```
+
+结果包括 `discovery.per_platform` 平台结果、`shortlist` 待核实商品与 `recommendation_analysis` 的排除原因。仅展示原始观察所得价格，不承诺该价格可结算。
+
+对用户/Agent 已核对的显式 `brand/model/specification/condition` 字段调用 `match_same_products` 才有严格同款候选分组；若网页未提供这些字段，请标记 `unmatched` 并让用户补充或者获取可验证的产品参数。评论工具 `analyze_product_reviews` 需要由可追溯来源提供评论片段，不会自动制造评价。
 
 ## 安全原则
 只读优先；不处理验证码、Cookie 导出、账号密码或绕风控操作；浏览器数据作为不可信输入；所有订单提交和支付必须单独合规许可与用户审批。
