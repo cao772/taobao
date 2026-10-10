@@ -4,10 +4,14 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from .browser import ReadOnlyBrowser
+from .browser import PlatformBrowserPool
 from .core import PLATFORMS, allowlisted_url, compare_offers, platform_from_url
 
-browser = ReadOnlyBrowser()
+from .intelligence import (analyze_reviews as _analyze_reviews,
+    match_same_products as _match_same_products, recommend_products as _recommend_products)
+from .orchestration import search_all_platforms as _search_all_platforms, research_purchase as _research_purchase
+
+browser = PlatformBrowserPool()
 
 # Imported at launch, not required for unit-testing core functions.
 from mcp.server.fastmcp import FastMCP
@@ -98,6 +102,85 @@ async def close_browser() -> dict[str, str]:
         return await browser.close()
     except Exception as e:
         return {"status": "error", "reason": str(e)[:320]}
+
+
+
+@mcp.tool()
+async def search_all_platforms(keyword: str,
+                               platforms_json: str = '["taobao","jd","pdd"]',
+                               per_platform_limit: int = 8) -> dict[str, Any]:
+    """Search multiple platforms in parallel in visible browsers; no guaranteed coverage.
+
+    platforms_json: JSON list of 1-6 platform keys (taobao/jd/pdd/dewu/xianyu/meituan).
+    Defaults to three retail marketplaces. Include all six explicitly when needed.
+    Results expose each platform's actual success/restriction state, not invented data.
+    """
+    try:
+        platforms = json.loads(platforms_json)
+        return await _search_all_platforms(browser.search, keyword, platforms, per_platform_limit)
+    except (ValueError, TypeError) as e:
+        return {"status": "invalid_input", "reason": str(e)[:320]}
+
+
+@mcp.tool()
+def match_same_products(products_json: str) -> dict[str, Any]:
+    """Group SKU candidates using explicit brand/model/specification/condition only.
+
+    Raw titles alone are insufficient; records missing fields stay unmatched.
+    """
+    try:
+        value = json.loads(products_json)
+        return _match_same_products(value)
+    except (ValueError, TypeError) as e:
+        return {"status": "invalid_input", "reason": str(e)[:320]}
+
+
+@mcp.tool()
+def analyze_product_reviews(reviews_json: str) -> dict[str, Any]:
+    """Summarize caller-supplied review excerpts and recurring defect signals.
+
+    Does NOT claim to have collected or verified reviews. No synthetic quality score.
+    """
+    try:
+        reviews = json.loads(reviews_json)
+        return _analyze_reviews(reviews)
+    except (ValueError, TypeError) as e:
+        return {"status": "invalid_input", "reason": str(e)[:320]}
+
+
+@mcp.tool()
+def recommend_best_products(products_json: str,
+                            budget_yuan: float | None = None,
+                            include_secondhand: bool = False,
+                            location: str = "", top_k: int = 3) -> dict[str, Any]:
+    """Evidence-aware provisional shortlist, never a fabricated best-quality ranking.
+
+    Supply explicit SKU fields to compare like-for-like. Optional shipping_yuan
+    and coupon_yuan allow an *estimate*, not an authenticated checkout quote.
+    """
+    try:
+        products = json.loads(products_json)
+        return _recommend_products(products, budget_yuan, include_secondhand, location, top_k)
+    except (ValueError, TypeError) as e:
+        return {"status": "invalid_input", "reason": str(e)[:320]}
+
+
+@mcp.tool()
+async def research_purchase(keyword: str, budget_yuan: float | None = None,
+                            platforms_json: str = '["taobao","jd","pdd"]',
+                            include_secondhand: bool = False,
+                            location: str = "", per_platform_limit: int = 8) -> dict[str, Any]:
+    """One-call shopping research: live search -> provenance -> conservative shortlist.
+
+    No reviews or seller quality can be inferred from a result card.
+    If no evidence appears, tool reports needs_more_evidence instead of picking goods.
+    """
+    try:
+        platforms = json.loads(platforms_json)
+        return await _research_purchase(browser.search, keyword, platforms, budget_yuan,
+                                        include_secondhand, location, per_platform_limit)
+    except (ValueError, TypeError) as e:
+        return {"status": "invalid_input", "reason": str(e)[:320]}
 
 
 def main() -> None:
