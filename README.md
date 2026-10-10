@@ -17,13 +17,14 @@ Codex / Hermes → MultiMall MCP (Python, stdio) → Search/Detail/Compare/Revie
 
 ## v0.2 智能选品引擎（feature/smart-shopping-engine 开发分支）
 
-新增 5 个 MCP 工具：
+新增 6 个 MCP 工具：
 
 - `search_all_platforms`：并发搜索多个平台，逐站记录成功/受限/失败，不将空结果当作无货；默认淘宝、京东、拼多多，传入平台列表可包含得物、闲鱼、美团。
 - `match_same_products`：**仅按显式品牌、型号、规格、新旧状态**划分同款候选组，未提供身份字段的结果不强行合并。
 - `analyze_product_reviews`：仅分析已取得的真实评论片段，报告出现的故障、假货疑虑、售后等信号，**不伪造产品质量分**。
 - `recommend_best_products`：基于展示价与可选运费/优惠数据给出待复核候选，不把低价称为最高质量。
-- `research_purchase`：一次调用搜索 → 汇总每平台覆盖状态 → 保守的 TOP 3 候选；评论数据和实际应付价仍须后续核验。
+- `research_purchase`：一次调用搜索 → 汇总每平台覆盖状态 → 保守的 TOP 3 候选；可选 `inspect_reviews_top_k=1..3` 尝试读取候选商品页可见评价。
+- `get_visible_reviews`：读取当前商品页 **确实渲染的疑似评价片段**（可能读不到），附页面地址/选择器/证据局限，并调用评论风险摘要。
 
 重要：此版本主要完成可运行的编排、接口和证据链；平台网页可能拒绝浏览器读取，商家真实评分、用户评价抓取、官方联盟 API 和支付接口**尚未打通**。工具会明确返回受限状态，而不是伪造价格或评分。
 
@@ -37,11 +38,12 @@ Codex / Hermes → MultiMall MCP (Python, stdio) → Search/Detail/Compare/Revie
   "budget_yuan": 200,
   "platforms_json": "[\\"taobao\\",\\"jd\\",\\"pdd\\",\\"xianyu\\"]",
   "include_secondhand": true,
-  "per_platform_limit": 8
+  "per_platform_limit": 8,
+  "inspect_reviews_top_k": 2
 }
 ```
 
-结果包括 `discovery.per_platform` 平台结果、`shortlist` 待核实商品与 `recommendation_analysis` 的排除原因。仅展示原始观察所得价格，不承诺该价格可结算。
+结果包括 `discovery.per_platform` 平台结果、`shortlist` 待核实商品、可选的 `review_summary` 与 `recommendation_analysis` 的排除原因。仅展示原始观察所得价格，不承诺该价格可结算。
 
 对用户/Agent 已核对的显式 `brand/model/specification/condition` 字段调用 `match_same_products` 才有严格同款候选分组；若网页未提供这些字段，请标记 `unmatched` 并让用户补充或者获取可验证的产品参数。评论工具 `analyze_product_reviews` 需要由可追溯来源提供评论片段，不会自动制造评价。
 
