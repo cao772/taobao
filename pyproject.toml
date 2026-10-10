@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multimall-mcp"
+version = "0.1.0"
+description = "Read-only multi-platform shopping MCP server for Codex and Hermes"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["mcp>=1.12,<3", "playwright>=1.45,<2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+multimall-mcp = "multimall.server:main"
+
+[tool.setuptools.packages.find]
+include = ["multimall*"]
