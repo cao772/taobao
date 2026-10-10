@@ -63,6 +63,36 @@ _DETAIL_EXTRACT = r"""
 """
 
 
+_REVIEW_EXTRACT = r"""
+({limit}) => {
+  // Conservative selectors: only visibly rendered elements that appear to be reviews.
+  // A page may expose no supported selectors (login, application-only, or lazy loading).
+  const selectors = [
+    '[data-testid="review-item"]',
+    '[data-testid="review-card"]',
+    '[class~="comment-item"]',
+    '[class~="review-item"]',
+    '[class~="rate-content"]',
+    '[class~="comment-content"]',
+    '[class~="rate-grid"]'
+  ];
+  const seen = new Set(), rows = [];
+  for (const selector of selectors) {
+    for (const node of document.querySelectorAll(selector)) {
+      if (rows.length >= limit) break;
+      const style = getComputedStyle(node);
+      const rect = node.getBoundingClientRect();
+      if (style.display === 'none' || style.visibility === 'hidden' || !rect.width || !rect.height) continue;
+      const text = (node.innerText || '').replace(/\s+/g, ' ').trim().slice(0, 800);
+      if (text.length < 12 || seen.has(text)) continue;
+      seen.add(text);
+      rows.push({ text, selector });
+    }
+    if (rows.length >= limit) break;
+  }
+  return {rows, page_title: document.title, page_url: location.href};
+}
+
 class ReadOnlyBrowser:
     def __init__(self, profile_dir: str | None = None) -> None:
         self._profile_dir = profile_dir
@@ -153,6 +183,32 @@ class ReadOnlyBrowser:
                 "notice": "candidate_price_texts 为正文中出现的候选价格，不一定是 SKU 实际售价；请复核规格、库存、地区与结算页。",
             }
 
+
+    async def visible_reviews(self, url: str, limit: int = 20) -> dict[str, Any]:
+        """Return ONLY visibly rendered review-like DOM snippets; not independently verified."""
+        if not allowlisted_url(url):
+            return {"status": "blocked_url", "reviews": [], "reason": "URL 不在允许列表"}
+        if not 1 <= limit <= 50:
+            return {"status": "invalid_input", "reviews": [], "reason": "limit 必须是 1-50"}
+        async with self._lock:
+            await self._ensure()
+            error = await self._visit(url)
+            if error:
+                return {**error, "reviews": []}
+            found = await self._page.evaluate(_REVIEW_EXTRACT, {"limit": limit})
+            rows = [{"text": r["text"], "source_url": found["page_url"],
+                     "extraction_selector": r["selector"], "verified_purchase": None}
+                    for r in found["rows"]]
+            return {
+                "status": "observed" if rows else "no_visible_reviews",
+                "platform": platform_from_url(found["page_url"]),
+                "reviews": rows,
+                "review_count": len(rows),
+                "page_url": found["page_url"],
+                "provenance": "visible_dom_only_not_independently_verified",
+                "caveat": "只能提取当前页面已渲染的疑似评论，可能遗漏分页/折叠差评，也无法核实真实购买；缺失不代表没有差评。",
+            }
+
     async def close(self) -> dict[str, str]:
         async with self._lock:
             if self._context is not None:
@@ -192,6 +248,13 @@ class PlatformBrowserPool:
         if p is None or not allowlisted_url(url):
             return {"status": "blocked_url", "reason": "不在电商站点允许列表中"}
         return await (await self._browser(p)).details(url)
+
+
+    async def visible_reviews(self, url: str, limit: int = 20) -> dict[str, Any]:
+        p = platform_from_url(url)
+        if p is None or not allowlisted_url(url):
+            return {"status": "blocked_url", "reviews": [], "reason": "URL 不在允许列表"}
+        return await (await self._browser(p)).visible_reviews(url, limit)
 
     async def close(self) -> dict[str, Any]:
         async with self._mutex:
