@@ -64,7 +64,8 @@ _DETAIL_EXTRACT = r"""
 
 
 class ReadOnlyBrowser:
-    def __init__(self) -> None:
+    def __init__(self, profile_dir: str | None = None) -> None:
+        self._profile_dir = profile_dir
         self._lock = asyncio.Lock()
         self._playwright = None
         self._context = None
@@ -78,7 +79,7 @@ class ReadOnlyBrowser:
         except ImportError as e:
             raise RuntimeError("缺少 playwright，执行 pip install -e . 和 python -m playwright install chromium") from e
         self._playwright = await async_playwright().start()
-        profile_dir = Path(os.environ.get("MULTIMALL_PROFILE_DIR", str(Path.home() / ".multimall-mcp" / "browser-profile"))).expanduser()
+        profile_dir = Path(self._profile_dir or os.environ.get("MULTIMALL_PROFILE_DIR", str(Path.home() / ".multimall-mcp" / "browser-profile"))).expanduser()
         profile_dir.mkdir(parents=True, exist_ok=True)
         headless = os.environ.get("MULTIMALL_HEADLESS", "false").lower() == "true"
         self._context = await self._playwright.chromium.launch_persistent_context(
@@ -160,3 +161,42 @@ class ReadOnlyBrowser:
                 await self._playwright.stop()
             self._context = self._page = self._playwright = None
             return {"status": "closed"}
+
+
+class PlatformBrowserPool:
+    """Separate persistent user-controlled sessions for independently browsed sites.
+
+    One profile per platform prevents Chromium profile locks during concurrent
+    discovery. No background scraping or stealth/browser fingerprint evasion.
+    """
+
+    def __init__(self) -> None:
+        self._browsers: dict[str, ReadOnlyBrowser] = {}
+        self._mutex = asyncio.Lock()
+        root = os.environ.get("MULTIMALL_PROFILE_DIR", str(Path.home() / ".multimall-mcp" / "browser-profiles"))
+        self._root = Path(root).expanduser()
+
+    async def _browser(self, platform: str) -> ReadOnlyBrowser:
+        if platform not in PLATFORMS:
+            raise ValueError("未支持的平台")
+        async with self._mutex:
+            if platform not in self._browsers:
+                self._browsers[platform] = ReadOnlyBrowser(profile_dir=str(self._root / platform))
+            return self._browsers[platform]
+
+    async def search(self, platform: str, query: str, limit: int = 10) -> dict[str, Any]:
+        return await (await self._browser(platform)).search(platform, query, limit)
+
+    async def details(self, url: str) -> dict[str, Any]:
+        p = platform_from_url(url)
+        if p is None or not allowlisted_url(url):
+            return {"status": "blocked_url", "reason": "不在电商站点允许列表中"}
+        return await (await self._browser(p)).details(url)
+
+    async def close(self) -> dict[str, Any]:
+        async with self._mutex:
+            browsers = list(self._browsers.values())
+            self._browsers.clear()
+        results = await asyncio.gather(*(browser.close() for browser in browsers), return_exceptions=True)
+        return {"status": "closed" if all(isinstance(r, dict) for r in results) else "partial",
+                "browsers_closed": sum(isinstance(r, dict) for r in results)}
