@@ -79,8 +79,8 @@ async def search_all_platforms(provider: SearchProvider, query: str,
 
     results = await asyncio.gather(*(one(p) for p in selected))
     products = [item for res in results for item in res["products"]]
-    success = [r["platform"] for r in results if r["status"] == "observed"]
-    restricted = [r["platform"] for r in results if r["status"] != "observed"]
+    success = [r["platform"] for r in results if r["status"] == "observed" and r["products"]]
+    restricted = [r["platform"] for r in results if r["status"] != "observed" or not r["products"]]
     return {
         "status": "observed_all" if not restricted else ("partial" if success else "no_verified_search_results"),
         "query": query.strip(),
