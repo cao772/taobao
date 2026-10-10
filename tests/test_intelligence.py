@@ -184,5 +184,5 @@ def test_invalid_platform_and_bounds_rejected():
 
 def test_source_unverified_not_cloaked_as_real_checkout():
     r = recommend_products([offer(price_status="checkout_verified")])
-    assert "真实结算" in r["warnings"][2]
+    assert "结算页核实" in r["warnings"][2]
     assert r["recommendations"][0]["same_sku_confirmed"] is False
