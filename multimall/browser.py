@@ -60,9 +60,15 @@ class ReadOnlyBrowser:
             await self._cleanup()
             raise RuntimeError('专用浏览器启动失败：检查浏览器安装、channel 和 Profile 是否被其他进程占用。') from None
 
-    async def _visit(self, url: str) -> dict[str, Any] | None:
+    async def _visit(self, url: str, reuse_current: bool = False) -> dict[str, Any] | None:
         if not allowlisted_url(url):
             raise ValueError('拒绝非电商允许域名或非 HTTPS 地址')
+        if reuse_current:
+            # CLI URLs are cached; refresh only metadata, never reload a manually verified page.
+            if hasattr(self._page, 'refresh_url'):
+                await self._page.refresh_url()
+            if allowlisted_url(self._page.url) and safe_page_url(self._page.url) == safe_page_url(url):
+                return None
         try:
             response = await self._page.goto(url, wait_until='domcontentloaded', timeout=30000)
         except Exception:
@@ -184,7 +190,7 @@ class ReadOnlyBrowser:
             return {'status': 'blocked_url', 'reason': '需要已支持平台的具体商品链接，不读取账户、订单或店铺页。'}
         async with self._lock:
             await self._ensure()
-            error = await self._visit(url)
+            error = await self._visit(url, reuse_current=True)
             if error:
                 return error
             found = await self._observe(platform, mode='detail', wait=False)
@@ -224,7 +230,7 @@ class ReadOnlyBrowser:
             return {'status': 'invalid_input', 'reviews': [], 'reason': 'limit 必须是 1-50'}
         async with self._lock:
             await self._ensure()
-            error = await self._visit(url)
+            error = await self._visit(url, reuse_current=True)
             if error:
                 return {**error, 'reviews': []}
             found = await self._observe(platform, limit, mode='reviews')
