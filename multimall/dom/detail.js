@@ -3,7 +3,7 @@
   const text = n => visible(n) ? n.innerText.replace(/\s+/g,' ').trim() : '';
   // Restrict evidence to product parameter and SKU containers, never account/address blocks.
   const selectors = {
-    jd: ['#parameter2 li', '.p-parameter li', '[class*="_gallery_"] [class*="_scoped_"]', '.choose-attr', '#choose-attrs .item'],
+    jd: ['.attribute .list .item', '#parameter2 li', '.p-parameter li', '[class*="_gallery_"] [class*="_scoped_"]', '.choose-attr', '#choose-attrs .item'],
     taobao: ['[class*="BasicContent--"] li', '[class*="Attribute--"] li', '[class*="skuItem--"]'],
     pdd: ['[class*="goods-attribute"]', '[class*="goods-spec"]', '[class*="sku-item"]'],
     xianyu: ['[class*="item-attribute"]', '[class*="item-info"] [class*="attribute"]'],
@@ -14,7 +14,7 @@
     seen.add(value); parameters.push({text:value,selector}); if(parameters.length>=40)break;
   }
   const attributes={};
-  const keys={brand:'品牌',model:'型号',unit:'销售单位',condition:'成色'};
+  const keys={brand:'品牌',model:'型号',unit:'销售单位',condition:'成色',manufacturer_part_number:'货号',product_id:'商品编号'};
   for(const [key,label] of Object.entries(keys)) for(const p of parameters) {
     const m=p.text.match(new RegExp('(?:^|\\s)'+label+'[：:\\s]+(.+?)(?=\\s+(?:品牌|型号|商品编号|店铺|货号|销售单位|成色)[：:\\s]|$)')); if(m && m[1].length<100) attributes[key]={value:m[1],selector:p.selector,text:p.text};
   }

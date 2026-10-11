@@ -211,3 +211,11 @@ def test_board_research_excludes_explicit_digital_resources_and_cases():
     assert len(result['intent_excluded']) == 2
     assert len(result['shortlist']) == 1
     assert result['shortlist'][0]['url'].endswith('/125.html')
+
+
+def test_mouse_research_excludes_receiver_but_keeps_mouse_with_receiver():
+    async def provider(platform,query,limit):
+        return {'status':'observed','products':[offer(title='罗技M185无线鼠标接收器'),offer(url='https://item.jd.com/124.html',title='罗技M185无线鼠标带接收器')]}
+    result=asyncio.run(research_purchase(provider,'罗技M185无线鼠标',['jd']))
+    assert len(result['intent_excluded']) == 1
+    assert len(result['shortlist']) == 1

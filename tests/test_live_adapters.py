@@ -151,12 +151,13 @@ def test_detail_selected_variant_separate_from_available_options():
         async with async_playwright() as pw:
             browser = await pw.chromium.launch(headless=True)
             page = await browser.new_page()
-            await page.set_content('''<ul id="parameter2"><li>品牌：Waveshare</li><li>型号：ESP32-S3</li></ul><div id="choose-attrs"><div class="item selected">N16R8</div><div class="item">N8R8</div></div><div>收货地址 隐私内容</div>''')
+            await page.set_content('''<ul id="parameter2"><li>品牌：Waveshare</li><li>型号：ESP32-S3</li></ul><div class="attribute"><div class="list"><div class="item"><span>销售单位</span><span>个</span></div></div></div><div id="choose-attrs"><div class="item selected">N16R8</div><div class="item">N8R8</div></div><div>收货地址 隐私内容</div>''')
             result = await page.evaluate(DETAIL_JS, {'platform':'jd'})
             await browser.close()
             return result
     result = asyncio.run(run())
     assert result['attributes']['brand']['value'] == 'Waveshare'
+    assert result['attributes']['unit']['value'] == '个'
     assert result['selected_specification'] == 'N16R8'
     assert len(result['sku_options']) == 2
     assert '隐私内容' not in str(result)

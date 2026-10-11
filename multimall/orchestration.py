@@ -111,6 +111,15 @@ async def research_purchase(provider: SearchProvider, query: str,
             else:
                 eligible.append(row)
         candidates = eligible
+    if "鼠标" in query and "接收器" not in query:
+        eligible = []
+        for row in candidates:
+            title = row["title"]
+            if re.search(r"接收器|鼠标垫|脚贴|微动开关|仅外壳", title) and not re.search(r"[含附带]接收器|鼠标[+＋]接收器", title):
+                intent_excluded.append({"url":row["url"], "title":title, "reason":"标题指向鼠标配件；不作为整鼠推荐", "evidence_source":"visible_search_title_not_product_parameters"})
+            else:
+                eligible.append(row)
+        candidates = eligible
     if not candidates:
         return {
             "status": "needs_more_evidence",

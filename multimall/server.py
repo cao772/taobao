@@ -211,7 +211,10 @@ async def research_purchase(keyword: str, budget_yuan: float | None = None,
                 evidence = await get_visible_reviews(item["url"], limit=20)
                 item["review_summary"] = evidence["summary"]
                 item["review_fetch_status"] = evidence["status"]
-            result["quality"] = "limited_visible_review_evidence_not_independently_verified"
+            samples = sum(item.get("review_summary", {}).get("sample_size", 0) for item in result["shortlist"])
+            result["review_sample_size"] = samples
+            result["quality"] = "limited_visible_review_evidence_not_independently_verified" if samples else "no_visible_review_evidence"
+            result["risk_entries"] = [{**risk, "product_url":item["url"]} for item in result["shortlist"] for risk in item.get("review_summary", {}).get("risk_entries", [])]
         return result
     except (ValueError, TypeError) as e:
         return {"status": "invalid_input", "reason": str(e)[:320]}
