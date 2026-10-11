@@ -161,3 +161,20 @@ def test_detail_selected_variant_separate_from_available_options():
     assert result['selected_specification'] == 'N16R8'
     assert len(result['sku_options']) == 2
     assert '隐私内容' not in str(result)
+
+
+def test_generic_model_does_not_override_explicit_registered_model():
+    from multimall.adapters import DETAIL_JS
+    async def run():
+        async with async_playwright() as pw:
+            browser=await pw.chromium.launch(headless=True)
+            page=await browser.new_page()
+            await page.set_content('<h1>罗技 M186 便宜鼠标</h1><div class="attribute"><div class="list"><div class="item"><span>型号</span><span>鼠标</span></div><div class="item"><span>国补备案型号</span><span>M185</span></div></div></div>')
+            result=await page.evaluate(DETAIL_JS,{'platform':'jd'})
+            await browser.close()
+            return result
+    result=asyncio.run(run())
+    assert result['attributes']['model']['value']=='M185'
+    assert result['attributes']['model']['label']=='国补备案型号'
+    assert result['attributes']['category_claim']['value']=='鼠标'
+    assert result['selected_specification']==''

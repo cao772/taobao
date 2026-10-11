@@ -1,0 +1,94 @@
+{
+  "observed_at_utc": "2026-10-11T04:40:07.413694+00:00",
+  "product_url": "https://item.jd.com/423478.html",
+  "kind": "actual_visible_parameter_observation",
+  "data": {
+    "parameters": [
+      {
+        "text": "品牌 罗技（Logitech）",
+        "raw_text": "品牌 罗技（Logitech）",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "商品编号 423478",
+        "raw_text": "商品编号 423478",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "型号 鼠标",
+        "raw_text": "型号 鼠标",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "国补备案型号 M185",
+        "raw_text": "国补备案型号 M185",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "供电方式 干电池",
+        "raw_text": "供电方式 干电池",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "同时连接设备数量 1台",
+        "raw_text": "同时连接设备数量 1台",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "材质 其他",
+        "raw_text": "材质 其他",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "兼容系统 兼容多系统",
+        "raw_text": "兼容系统 兼容多系统",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "鼠标类型 对称手型",
+        "raw_text": "鼠标类型 对称手型",
+        "selector": ".attribute .list .item"
+      }
+    ],
+    "attributes": {
+      "brand": {
+        "value": "罗技（Logitech）",
+        "label": "品牌",
+        "selector": ".attribute .list .item",
+        "text": "品牌 罗技（Logitech）"
+      },
+      "product_id": {
+        "value": "423478",
+        "label": "商品编号",
+        "selector": ".attribute .list .item",
+        "text": "商品编号 423478"
+      },
+      "registered_model": {
+        "value": "M185",
+        "label": "国补备案型号",
+        "selector": ".attribute .list .item",
+        "text": "国补备案型号 M185"
+      },
+      "category_claim": {
+        "value": "鼠标",
+        "label": "型号",
+        "selector": ".attribute .list .item",
+        "text": "型号 鼠标"
+      },
+      "model": {
+        "value": "M185",
+        "label": "国补备案型号",
+        "selector": ".attribute .list .item",
+        "text": "国补备案型号 M185",
+        "derivation": "explicit_registered_model_generic_model_field_unusable"
+      }
+    },
+    "sku_options": [],
+    "selected_specification": "",
+    "missing_fields": [
+      "unit",
+      "condition"
+    ],
+    "notice": "只有明确选中的 SKU 可用于规格对比；可选列表不代表当前价格对应的 SKU。商品标题不作为参数证据。"
+  }
+}

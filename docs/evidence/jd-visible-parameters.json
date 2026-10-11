@@ -1,0 +1,58 @@
+{
+  "product_url": "https://item.jd.com/10196653863238.html",
+  "kind": "actual_visible_parameter_observation",
+  "data": {
+    "parameters": [
+      {
+        "text": "品牌 Waveshare",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "商品编号 10196653863238",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "店铺 Waveshare官方旗舰店",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "货号 32767",
+        "selector": ".attribute .list .item"
+      },
+      {
+        "text": "销售单位 个",
+        "selector": ".attribute .list .item"
+      }
+    ],
+    "attributes": {
+      "brand": {
+        "value": "Waveshare",
+        "selector": ".attribute .list .item",
+        "text": "品牌 Waveshare"
+      },
+      "unit": {
+        "value": "个",
+        "selector": ".attribute .list .item",
+        "text": "销售单位 个"
+      },
+      "manufacturer_part_number": {
+        "value": "32767",
+        "selector": ".attribute .list .item",
+        "text": "货号 32767"
+      },
+      "product_id": {
+        "value": "10196653863238",
+        "selector": ".attribute .list .item",
+        "text": "商品编号 10196653863238"
+      }
+    },
+    "sku_options": [],
+    "selected_specification": "",
+    "missing_fields": [
+      "model",
+      "condition"
+    ],
+    "notice": "只有明确选中的 SKU 可用于规格对比；可选列表不代表当前价格对应的 SKU。商品标题不作为参数证据。"
+  },
+  "observed_at_utc": "2026-10-11T04:34:19.318051+00:00"
+}

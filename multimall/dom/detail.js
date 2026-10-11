@@ -10,13 +10,22 @@
   }[platform] || [];
   const parameters=[], seen=new Set();
   for (const selector of selectors) for (const n of document.querySelectorAll(selector)) {
-    const value=text(n); if (!value || value.length>600 || seen.has(value)) continue;
-    seen.add(value); parameters.push({text:value,selector}); if(parameters.length>=40)break;
+    const raw=text(n);
+    const label=n.firstElementChild ? text(n.firstElementChild) : '';
+    const value=/^(品牌|型号|销售单位|成色|货号|商品编号|国补备案型号)$/.test(label) ? [...n.children].map(text).filter(Boolean).join(' ') : raw;
+    if (!value || value.length>600 || seen.has(value)) continue;
+    seen.add(value); parameters.push({text:value,raw_text:raw,selector}); if(parameters.length>=40)break;
   }
   const attributes={};
-  const keys={brand:'品牌',model:'型号',unit:'销售单位',condition:'成色',manufacturer_part_number:'货号',product_id:'商品编号'};
+  const keys={brand:'品牌',model:'型号',unit:'销售单位',condition:'成色',manufacturer_part_number:'货号',product_id:'商品编号',registered_model:'国补备案型号'};
   for(const [key,label] of Object.entries(keys)) for(const p of parameters) {
-    const m=p.text.match(new RegExp('(?:^|\\s)'+label+'[：:\\s]+(.+?)(?=\\s+(?:品牌|型号|商品编号|店铺|货号|销售单位|成色)[：:\\s]|$)')); if(m && m[1].length<100) attributes[key]={value:m[1],selector:p.selector,text:p.text};
+    const m=p.text.match(new RegExp('(?:^|\\s)'+label+'[：:\\s]+(.+?)(?=\\s+(?:品牌|型号|商品编号|店铺|货号|销售单位|成色|国补备案型号)[：:\\s]|$)')); if(m && m[1].length<100) attributes[key]={value:m[1],label,selector:p.selector,text:p.text};
+  }
+  if (attributes.model && /^(鼠标|手机|开发板|显示屏|耳机)$/.test(attributes.model.value)) {
+    const generic = attributes.model;
+    delete attributes.model;
+    attributes.category_claim = generic;
+    if (attributes.registered_model) attributes.model = {...attributes.registered_model, derivation:'explicit_registered_model_generic_model_field_unusable'};
   }
   const options=[];
   for(const selector of ['[class*="valueItem--"]','#choose-attrs .item','.choose-attr .item','[class*="sku-item"]']) for(const n of document.querySelectorAll(selector)) {

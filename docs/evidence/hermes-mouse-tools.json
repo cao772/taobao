@@ -1,0 +1,670 @@
+{
+  "client": "Hermes local CLI",
+  "model": "existing DeepSeek configuration",
+  "kind": "completed_MCP_tool_results",
+  "calls": [
+    {
+      "tool": "mcp__multimall__list_platforms",
+      "observed_at_utc": "2026-10-11T04:36:50.286567+00:00",
+      "result": {
+        "platforms": {
+          "taobao": {
+            "name": "淘宝/天猫",
+            "type": "retail",
+            "browser": "platform_visible_dom_adapter",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "淘宝客物料搜索（需应用权限；商品覆盖有限）",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "jd": {
+            "name": "京东",
+            "type": "retail",
+            "browser": "platform_visible_dom_adapter",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "京东联盟商品查询（需联盟权限）",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "pdd": {
+            "name": "拼多多",
+            "type": "retail",
+            "browser": "platform_visible_dom_adapter",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "多多进宝商品搜索（需开放平台权限）",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "dewu": {
+            "name": "得物",
+            "type": "retail",
+            "browser": "manual_only",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "暂未集成官方消费端全站搜索；第三方商业接口须另行授权核实",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "xianyu": {
+            "name": "闲鱼",
+            "type": "secondhand",
+            "browser": "platform_visible_dom_adapter",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "闲鱼服务商接口通常需要准入/授权；非通用全站搜索",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "meituan": {
+            "name": "美团",
+            "type": "local_service",
+            "browser": "manual_only",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "美团联盟商品查询（需联盟权限）；区域/门店/时段影响价格",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          }
+        },
+        "notice": "官方联盟 API 尚未配置凭证；浏览器读取依赖用户环境与页面权限。"
+      }
+    },
+    {
+      "tool": "mcp__multimall__research_purchase",
+      "observed_at_utc": "2026-10-11T04:37:42.554354+00:00",
+      "result": {
+        "status": "provisional_results",
+        "intent_excluded": [
+          {
+            "url": "https://www.goofish.com/item?id=1060660198514",
+            "title": "罗技G502无线鼠标接收器，罗技无线G502原厂接收器适配器 无线G502接收器原装包配对成功29包邮其他配件请咨询需要可以拍下无质量问题售出不退不换",
+            "reason": "标题指向鼠标配件；不作为整鼠推荐",
+            "evidence_source": "visible_search_title_not_product_parameters"
+          },
+          {
+            "url": "https://www.goofish.com/item?id=1011303672898",
+            "title": "罗技双通道接收器 cu0010 罗技无线键鼠接收器，支持罗技多种型号键盘鼠标配对，非优联版，每个都贴有防伪标志，撕毁无效。 鼠标：M150/M170/M171/M185/M188/M205/M210/M212/M215/M220/M221/M225/M235/M238/...",
+            "reason": "标题指向鼠标配件；不作为整鼠推荐",
+            "evidence_source": "visible_search_title_not_product_parameters"
+          },
+          {
+            "url": "https://mobile.yangkeduo.com/goods.html?goods_id=770975941333",
+            "title": "罗技鼠标M187p无线鼠标游戏电竞办公电脑通用",
+            "reason": "标题显式型号与指定型号不一致",
+            "evidence_source": "visible_search_title_not_product_parameters"
+          }
+        ],
+        "discovery": {
+          "status": "observed_all",
+          "query": "罗技 M185 无线鼠标",
+          "requested_platforms": [
+            "taobao",
+            "jd",
+            "pdd",
+            "xianyu"
+          ],
+          "observed_platforms": [
+            "taobao",
+            "jd",
+            "pdd",
+            "xianyu"
+          ],
+          "limited_platforms": [],
+          "per_platform": [
+            {
+              "platform": "taobao",
+              "status": "observed",
+              "products": [
+                {
+                  "platform": "taobao",
+                  "url": "https://item.taobao.com/item.htm?id=574424991953",
+                  "title": "罗技M185无线光电鼠标USB笔记本台式电脑办公家用省电186无线拆包",
+                  "brand": "",
+                  "model": "",
+                  "specification": "",
+                  "condition": "unknown",
+                  "product_form": "unknown",
+                  "unit": "unknown",
+                  "pack_count": null,
+                  "detail_evidence": {},
+                  "merchant": "罗技正品外设店",
+                  "displayed_price_yuan": "39",
+                  "price_status": "unverified_display",
+                  "source": "browser_observation",
+                  "observed_at_utc": "2026-10-11T04:37:01.416754+00:00",
+                  "shipping_yuan": null,
+                  "coupon_yuan": null,
+                  "seller_rating": null,
+                  "seller_rating_count": null,
+                  "return_policy": null,
+                  "raw_price_text": "39",
+                  "evidence": {
+                    "card_selector": "[class*=\"doubleCardWrapper\"]",
+                    "title_selector": "[class*=\"title--\"]",
+                    "price_selector": "[class*=\"innerPriceWrapper\"]",
+                    "merchant_selector": "[class*=\"shopNameText\"]"
+                  }
+                },
+                {
+                  "platform": "taobao",
+                  "url": "https://item.taobao.com/item.htm?id=761888587604",
+                  "title": "旗舰罗技m185无线鼠标电竞游戏办公m186耐用笔记本台式电脑m187p",
+                  "brand": "",
+                  "model": "",
+                  "specification": "",
+                  "condition": "unknown",
+                  "product_form": "unknown",
+                  "unit": "unknown",
+                  "pack_count": null,
+                  "detail_evidence": {},
+                  "merchant": "百亿补贴品牌优选",
+                  "displayed_price_yuan": "38",
+                  "price_status": "unverified_display",
+                  "source": "browser_observation",
+                  "observed_at_utc": "2026-10-11T04:37:01.417080+00:00",
+                  "shipping_yuan": null,
+                  "coupon_yuan": null,
+                  "seller_rating": null,
+                  "seller_rating_count": null,
+                  "return_policy": null,
+                  "raw_price_text": "38",
+                  "evidence": {
+                    "card_selector": "[class*=\"doubleCardWrapper\"]",
+                    "title_selector": "[class*=\"title--\"]",
+                    "price_selector": "[class*=\"innerPriceWrapper\"]",
+                    "merchant_selector": "[class*=\"shopNameText\"]"
+                  }
+                }
+              ],
+              "rejected_records": 0,
+              "reason": "仅包含当前页面可见商品字段；未知价格保持 null，展示价未经结算验证。",
+              "search_entry": "https://s.taobao.com/search?q=%E7%BD%97%E6%8A%80+M185+%E6%97%A0%E7%BA%BF%E9%BC%A0%E6%A0%87"
+            },
+            {
+              "platform": "jd",
+              "status": "observed",
+              "products": [
+                {
+                  "platform": "jd",
+                  "url": "https://item.jd.com/10042275731805.html",
+                  "title": "罗技（Logitech）M185无线鼠标办公家用即插即用带接收器usb接口笔记本台式机用轻量便携左右手通用鼠标 M185无线鼠标-黑色灰边",
+                  "brand": "",
+                  "model": "",
+                  "specification": "",
+                  "condition": "unknown",
+                  "product_form": "unknown",
+                  "unit": "unknown",
+                  "pack_count": null,
+                  "detail_evidence": {},
+                  "merchant": "罗技高端外设旗舰店",
+                  "displayed_price_yuan": "55.08",
+                  "price_status": "unverified_display",
+                  "source": "browser_observation",
+                  "observed_at_utc": "2026-10-11T04:37:03.008177+00:00",
+                  "shipping_yuan": null,
+                  "coupon_yuan": null,
+                  "seller_rating": null,
+                  "seller_rating_count": null,
+                  "return_policy": null,
+                  "raw_price_text": "¥ 55 . 08",
+                  "evidence": {
+                    "card_selector": ".plugin_goodsCardWrapper[data-sku]",
+                    "title_selector": "[class*=\"_goods_title_container_\"]",
+                    "price_selector": "span[class*=\"_price_\"]",
+                    "merchant_selector": "span[class*=\"_name_\"]"
+                  }
+                },
+                {
+                  "platform": "jd",
+                  "url": "https://item.jd.com/423478.html",
+                  "title": "罗技（Logitech）M185鼠标 无线鼠标 办公鼠标 对称鼠标 黑色灰边 带无线2.4G接收器",
+                  "brand": "",
+                  "model": "",
+                  "specification": "",
+                  "condition": "unknown",
+                  "product_form": "unknown",
+                  "unit": "unknown",
+                  "pack_count": null,
+                  "detail_evidence": {},
+                  "merchant": "罗技京东自营旗舰店",
+                  "displayed_price_yuan": "43",
+                  "price_status": "unverified_display",
+                  "source": "browser_observation",
+                  "observed_at_utc": "2026-10-11T04:37:03.008229+00:00",
+                  "shipping_yuan": null,
+                  "coupon_yuan": null,
+                  "seller_rating": null,
+                  "seller_rating_count": null,
+                  "return_policy": null,
+                  "raw_price_text": "¥ 43",
+                  "evidence": {
+                    "card_selector": ".plugin_goodsCardWrapper[data-sku]",
+                    "title_selector": "[class*=\"_goods_title_container_\"]",
+                    "price_selector": "span[class*=\"_price_\"]",
+                    "merchant_selector": "span[class*=\"_name_\"]"
+                  }
+                }
+              ],
+              "rejected_records": 0,
+              "reason": "仅包含当前页面可见商品字段；未知价格保持 null，展示价未经结算验证。",
+              "search_entry": "https://search.jd.com/Search?keyword=%E7%BD%97%E6%8A%80+M185+%E6%97%A0%E7%BA%BF%E9%BC%A0%E6%A0%87"
+            },
+            {
+              "platform": "pdd",
+              "status": "observed",
+              "products": [
+                {
+                  "platform": "pdd",
+                  "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+                  "title": "罗技M185无线办公鼠标笔记本台式电脑家用便携即插即用持久续航",
+                  "brand": "",
+                  "model": "",
+                  "specification": "",
+                  "condition": "unknown",
+                  "product_form": "unknown",
+                  "unit": "unknown",
+                  "pack_count": null,
+                  "detail_evidence": {},
+                  "merchant": "",
+                  "displayed_price_yuan": "35.29",
+                  "price_status": "unverified_display",
+                  "source": "browser_observation",
+                  "observed_at_utc": "2026-10-11T04:37:18.573765+00:00",
+                  "shipping_yuan": null,
+                  "coupon_yuan": null,
+                  "seller_rating": null,
+                  "seller_rating_count": null,
+                  "return_policy": null,
+                  "raw_price_text": "券后 ¥ 35 .29",
+                  "evidence": {
+                    "card_selector": "._3glhOBhU",
+                    "title_selector": "._3ANzdjkc",
+                    "price_selector": "._3_U04GgA",
+                    "merchant_selector": null,
+                    "link_source": "visible_title_click_navigation"
+                  }
+                },
+                {
+                  "platform": "pdd",
+                  "url": "https://mobile.yangkeduo.com/goods.html?goods_id=770975941333",
+                  "title": "罗技鼠标M187p无线鼠标游戏电竞办公电脑通用",
+                  "brand": "",
+                  "model": "",
+                  "specification": "",
+                  "condition": "unknown",
+                  "product_form": "unknown",
+                  "unit": "unknown",
+                  "pack_count": null,
+                  "detail_evidence": {},
+                  "merchant": "",
+                  "displayed_price_yuan": "36.99",
+                  "price_status": "unverified_display",
+                  "source": "browser_observation",
+                  "observed_at_utc": "2026-10-11T04:37:18.573858+00:00",
+                  "shipping_yuan": null,
+                  "coupon_yuan": null,
+                  "seller_rating": null,
+                  "seller_rating_count": null,
+                  "return_policy": null,
+                  "raw_price_text": "券后 ¥ 36 .99",
+                  "evidence": {
+                    "card_selector": "._3glhOBhU",
+                    "title_selector": "._3ANzdjkc",
+                    "price_selector": "._3_U04GgA",
+                    "merchant_selector": null,
+                    "link_source": "visible_title_click_navigation"
+                  }
+                }
+              ],
+              "rejected_records": 0,
+              "reason": "仅包含当前页面可见商品字段；未知价格保持 null，展示价未经结算验证。",
+              "search_entry": "https://mobile.yangkeduo.com/search_result.html?search_key=%E7%BD%97%E6%8A%80+M185+%E6%97%A0%E7%BA%BF%E9%BC%A0%E6%A0%87"
+            },
+            {
+              "platform": "xianyu",
+              "status": "observed",
+              "products": [
+                {
+                  "platform": "xianyu",
+                  "url": "https://www.goofish.com/item?id=1060660198514",
+                  "title": "罗技G502无线鼠标接收器，罗技无线G502原厂接收器适配器 无线G502接收器原装包配对成功29包邮其他配件请咨询需要可以拍下无质量问题售出不退不换",
+                  "brand": "",
+                  "model": "",
+                  "specification": "",
+                  "condition": "unknown",
+                  "product_form": "unknown",
+                  "unit": "unknown",
+                  "pack_count": null,
+                  "detail_evidence": {},
+                  "merchant": "",
+                  "displayed_price_yuan": "28",
+                  "price_status": "unverified_display",
+                  "source": "browser_observation",
+                  "observed_at_utc": "2026-10-11T04:37:13.404267+00:00",
+                  "shipping_yuan": null,
+                  "coupon_yuan": null,
+                  "seller_rating": null,
+                  "seller_rating_count": null,
+                  "return_policy": null,
+                  "raw_price_text": "¥ 28",
+                  "evidence": {
+                    "card_selector": "a[class*=\"feeds-item-wrap\"]",
+                    "title_selector": "[class*=\"main-title\"]",
+                    "price_selector": "[class*=\"price-wrap\"]",
+                    "merchant_selector": null
+                  }
+                },
+                {
+                  "platform": "xianyu",
+                  "url": "https://www.goofish.com/item?id=1011303672898",
+                  "title": "罗技双通道接收器 cu0010 罗技无线键鼠接收器，支持罗技多种型号键盘鼠标配对，非优联版，每个都贴有防伪标志，撕毁无效。 鼠标：M150/M170/M171/M185/M188/M205/M210/M212/M215/M220/M221/M225/M235/M238/...",
+                  "brand": "",
+                  "model": "",
+                  "specification": "",
+                  "condition": "unknown",
+                  "product_form": "unknown",
+                  "unit": "unknown",
+                  "pack_count": null,
+                  "detail_evidence": {},
+                  "merchant": "",
+                  "displayed_price_yuan": "16.50",
+                  "price_status": "unverified_display",
+                  "source": "browser_observation",
+                  "observed_at_utc": "2026-10-11T04:37:13.404393+00:00",
+                  "shipping_yuan": null,
+                  "coupon_yuan": null,
+                  "seller_rating": null,
+                  "seller_rating_count": null,
+                  "return_policy": null,
+                  "raw_price_text": "¥ 16 .50",
+                  "evidence": {
+                    "card_selector": "a[class*=\"feeds-item-wrap\"]",
+                    "title_selector": "[class*=\"main-title\"]",
+                    "price_selector": "[class*=\"price-wrap\"]",
+                    "merchant_selector": null
+                  }
+                }
+              ],
+              "rejected_records": 0,
+              "reason": "仅包含当前页面可见商品字段；未知价格保持 null，展示价未经结算验证。",
+              "search_entry": "https://www.goofish.com/search?q=%E7%BD%97%E6%8A%80+M185+%E6%97%A0%E7%BA%BF%E9%BC%A0%E6%A0%87"
+            }
+          ],
+          "products_count": 8,
+          "source_notice": "仅汇总即时可见商品记录；受限平台不推断有无商品或价格。价格未经结算验证。"
+        },
+        "shortlist": [
+          {
+            "index": 4,
+            "title": "罗技M185无线办公鼠标笔记本台式电脑家用便携即插即用持久续航",
+            "platform": "pdd",
+            "merchant": "",
+            "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+            "displayed_price_yuan": "35.29",
+            "observed_at_utc": "2026-10-11T04:37:18.573765+00:00",
+            "source": "browser_observation",
+            "evidence": {
+              "card_selector": "._3glhOBhU",
+              "title_selector": "._3ANzdjkc",
+              "price_selector": "._3_U04GgA",
+              "merchant_selector": null,
+              "link_source": "visible_title_click_navigation"
+            },
+            "raw_price_text": "券后 ¥ 35 .29",
+            "estimated_total_yuan": null,
+            "price_explanation": "展示价/运费/优惠缺失或金额无效",
+            "identity_key": null,
+            "same_sku_confirmed": false,
+            "seller_evidence": "missing",
+            "quality_evidence": "missing_or_unverified",
+            "recommendation_basis": "displayed_price_only_no_quality_assessment",
+            "rank_within_identity_group": 1,
+            "detail_evidence": {
+              "status": "observed",
+              "platform": "pdd",
+              "data": {
+                "parameters": [],
+                "attributes": {},
+                "sku_options": [],
+                "selected_specification": "",
+                "missing_fields": [
+                  "brand",
+                  "model",
+                  "unit",
+                  "condition"
+                ],
+                "notice": "只有明确选中的 SKU 可用于规格对比；可选列表不代表当前价格对应的 SKU。商品标题不作为参数证据。",
+                "observed_at_utc": "2026-10-11T04:37:23.617532+00:00",
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982"
+              },
+              "data_source": "live_visible_browser_not_checkout_verified",
+              "notice": "可见文本仅为页面证据，不把任意正文金额当作 SKU 售价。"
+            },
+            "structured_identity": {
+              "brand": "",
+              "model": "",
+              "unit": "",
+              "specification": "",
+              "condition": "unknown"
+            },
+            "missing_identity_fields": [
+              "brand",
+              "model",
+              "specification",
+              "condition"
+            ],
+            "decision_reasons": [
+              "展示价在预算内；同 SKU、运费与优惠资格仍待核验"
+            ],
+            "review_summary": {
+              "status": "no_review_evidence",
+              "sample_size": 0,
+              "duplicate_snippets_removed": 0,
+              "risk_entries": [],
+              "rating_samples": 0,
+              "mean_rating_from_supplied_samples": null,
+              "positive_keyword_mentions": 0,
+              "issue_review_mentions": 0,
+              "issue_topics": {},
+              "review_evidence": [],
+              "quality_score": null,
+              "evidence_level": "limited_unverified_snippets",
+              "caveat": "只分析传入的评论片段，未验证是否真实购买、刷评、样本是否有偏或覆盖全部差评；不输出产品质量分。"
+            },
+            "review_fetch_status": "no_visible_reviews"
+          },
+          {
+            "index": 1,
+            "title": "旗舰罗技m185无线鼠标电竞游戏办公m186耐用笔记本台式电脑m187p",
+            "platform": "taobao",
+            "merchant": "百亿补贴品牌优选",
+            "url": "https://item.taobao.com/item.htm?id=761888587604",
+            "displayed_price_yuan": "38",
+            "observed_at_utc": "2026-10-11T04:37:01.417080+00:00",
+            "source": "browser_observation",
+            "evidence": {
+              "card_selector": "[class*=\"doubleCardWrapper\"]",
+              "title_selector": "[class*=\"title--\"]",
+              "price_selector": "[class*=\"innerPriceWrapper\"]",
+              "merchant_selector": "[class*=\"shopNameText\"]"
+            },
+            "raw_price_text": "38",
+            "estimated_total_yuan": null,
+            "price_explanation": "展示价/运费/优惠缺失或金额无效",
+            "identity_key": null,
+            "same_sku_confirmed": false,
+            "seller_evidence": "missing",
+            "quality_evidence": "missing_or_unverified",
+            "recommendation_basis": "displayed_price_only_no_quality_assessment",
+            "rank_within_identity_group": 2,
+            "detail_evidence": {
+              "status": "verification_required",
+              "reason": "平台要求人工验证；请在浏览器处理后重试，不自动处理验证码。",
+              "data": null
+            },
+            "structured_identity": {
+              "brand": "",
+              "model": "",
+              "unit": "",
+              "specification": "",
+              "condition": "unknown"
+            },
+            "missing_identity_fields": [
+              "brand",
+              "model",
+              "specification",
+              "condition"
+            ],
+            "decision_reasons": [
+              "展示价在预算内；同 SKU、运费与优惠资格仍待核验"
+            ]
+          },
+          {
+            "index": 0,
+            "title": "罗技M185无线光电鼠标USB笔记本台式电脑办公家用省电186无线拆包",
+            "platform": "taobao",
+            "merchant": "罗技正品外设店",
+            "url": "https://item.taobao.com/item.htm?id=574424991953",
+            "displayed_price_yuan": "39",
+            "observed_at_utc": "2026-10-11T04:37:01.416754+00:00",
+            "source": "browser_observation",
+            "evidence": {
+              "card_selector": "[class*=\"doubleCardWrapper\"]",
+              "title_selector": "[class*=\"title--\"]",
+              "price_selector": "[class*=\"innerPriceWrapper\"]",
+              "merchant_selector": "[class*=\"shopNameText\"]"
+            },
+            "raw_price_text": "39",
+            "estimated_total_yuan": null,
+            "price_explanation": "展示价/运费/优惠缺失或金额无效",
+            "identity_key": null,
+            "same_sku_confirmed": false,
+            "seller_evidence": "missing",
+            "quality_evidence": "missing_or_unverified",
+            "recommendation_basis": "displayed_price_only_no_quality_assessment",
+            "rank_within_identity_group": 3
+          }
+        ],
+        "recommendation_analysis": {
+          "status": "provisional_shortlist",
+          "total_eligible": 5,
+          "excluded": [],
+          "identity_check": {
+            "status": "ok",
+            "candidate_groups": [],
+            "singletons": [],
+            "unmatched": [
+              {
+                "index": 0,
+                "url": "https://item.taobao.com/item.htm?id=574424991953",
+                "title": "罗技M185无线光电鼠标USB笔记本台式电脑办公家用省电186无线拆包",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 1,
+                "url": "https://item.taobao.com/item.htm?id=761888587604",
+                "title": "旗舰罗技m185无线鼠标电竞游戏办公m186耐用笔记本台式电脑m187p",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 2,
+                "url": "https://item.jd.com/10042275731805.html",
+                "title": "罗技（Logitech）M185无线鼠标办公家用即插即用带接收器usb接口笔记本台式机用轻量便携左右手通用鼠标 M185无线鼠标-黑色灰边",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 3,
+                "url": "https://item.jd.com/423478.html",
+                "title": "罗技（Logitech）M185鼠标 无线鼠标 办公鼠标 对称鼠标 黑色灰边 带无线2.4G接收器",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 4,
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+                "title": "罗技M185无线办公鼠标笔记本台式电脑家用便携即插即用持久续航",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              }
+            ],
+            "errors": [],
+            "warning": "仅比较显式品牌、型号、变体规格与新旧状态完全一致的候选；不保证真正同 SKU，需核对商家详情。"
+          },
+          "ranking_scope": "within_explicit_variant_groups_only; incomplete_identity_not_comparable",
+          "warnings": [
+            "该列表不是最终质量排名，也不能据此认定最值得买：商品评价、真伪、卖家信誉、售后均未独立核实。",
+            "只有明确品牌/型号/规格/新旧完全一致的候选才属于同款候选组；需要人工确认实物 SKU。",
+            "展示价格不等于最终实付价；运费、优惠券、会员、地区价及库存必须在结算页核实。",
+            "不执行购物车、下单和支付操作。"
+          ]
+        },
+        "quality": "no_visible_review_evidence",
+        "next_step": "确认同 SKU，再获取可信的评价和商家证据；实付价格以结算页为准。",
+        "checkout_verified": false,
+        "checked": [
+          "visible_search_links",
+          "displayed_prices",
+          "platform_coverage",
+          "shortlisted_visible_product_parameters"
+        ],
+        "missing": [
+          "authenticated_checkout_price",
+          "verified_purchase_reviews",
+          "certified_merchant_reputation",
+          "same_sku_confirmation_if_identity_fields_missing"
+        ],
+        "detail_identity_check": {
+          "status": "ok",
+          "candidate_groups": [],
+          "singletons": [],
+          "unmatched": [
+            {
+              "index": 0,
+              "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+              "title": "罗技M185无线办公鼠标笔记本台式电脑家用便携即插即用持久续航",
+              "reason": "brand/model/specification/condition 缺失，不能认定同款"
+            },
+            {
+              "index": 1,
+              "url": "https://item.taobao.com/item.htm?id=761888587604",
+              "title": "旗舰罗技m185无线鼠标电竞游戏办公m186耐用笔记本台式电脑m187p",
+              "reason": "brand/model/specification/condition 缺失，不能认定同款"
+            }
+          ],
+          "errors": [],
+          "warning": "仅比较显式品牌、型号、变体规格与新旧状态完全一致的候选；不保证真正同 SKU，需核对商家详情。"
+        },
+        "review_sample_size": 0,
+        "risk_entries": []
+      }
+    },
+    {
+      "tool": "mcp__multimall__close_browser",
+      "observed_at_utc": "2026-10-11T04:37:50.194332+00:00",
+      "result": {
+        "status": "released_external_session",
+        "browsers_closed": 0,
+        "external_sessions_released": 4
+      }
+    }
+  ]
+}
