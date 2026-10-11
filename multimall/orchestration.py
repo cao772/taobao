@@ -115,8 +115,18 @@ async def research_purchase(provider: SearchProvider, query: str,
         eligible = []
         for row in candidates:
             title = row["title"]
-            if re.search(r"接收器|鼠标垫|脚贴|微动开关|仅外壳", title) and not re.search(r"[含附带]接收器|鼠标[+＋]接收器", title):
+            if re.search(r"接收器|鼠标垫|脚贴|微动开关|仅外壳", title) and not re.search(r"[含附带].{0,12}接收器|无接收器|鼠标[+＋]接收器", title):
                 intent_excluded.append({"url":row["url"], "title":title, "reason":"标题指向鼠标配件；不作为整鼠推荐", "evidence_source":"visible_search_title_not_product_parameters"})
+            else:
+                eligible.append(row)
+        candidates = eligible
+    requested_models = set(re.findall(r"(?<![a-z0-9])m\d{3,4}[a-z]?(?![a-z0-9])", query.casefold()))
+    if requested_models:
+        eligible = []
+        for row in candidates:
+            listed_models = set(re.findall(r"(?<![a-z0-9])m\d{3,4}[a-z]?(?![a-z0-9])", row["title"].casefold()))
+            if listed_models and not requested_models.intersection(listed_models):
+                intent_excluded.append({"url":row["url"], "title":row["title"], "reason":"标题显式型号与指定型号不一致", "evidence_source":"visible_search_title_not_product_parameters"})
             else:
                 eligible.append(row)
         candidates = eligible

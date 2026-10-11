@@ -219,3 +219,12 @@ def test_mouse_research_excludes_receiver_but_keeps_mouse_with_receiver():
     result=asyncio.run(research_purchase(provider,'罗技M185无线鼠标',['jd']))
     assert len(result['intent_excluded']) == 1
     assert len(result['shortlist']) == 1
+
+
+def test_mouse_receiver_word_does_not_remove_complete_or_receiver_missing_mouse():
+    async def provider(platform,query,limit):
+        return {'status':'observed','products':[offer(title='罗技 M185 无线鼠标 带无线2.4G接收器'),offer(url='https://item.jd.com/124.html',title='罗技 M185 无线鼠标 无接收器'),offer(url='https://item.jd.com/125.html',title='罗技 M187p 无线鼠标')]}
+    result=asyncio.run(research_purchase(provider,'罗技 M185 无线鼠标',['jd']))
+    assert len(result['shortlist']) == 2
+    assert len(result['intent_excluded']) == 1
+    assert '型号' in result['intent_excluded'][0]['reason']
