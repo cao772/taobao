@@ -17,6 +17,6 @@
 
 本地自动化：**44/44 通过**，包含实际 Chromium 渲染的离线 DOM 测试、原生浏览器拼多多标题点击/地址解析/返回搜索页测试、二手候选授权保护和 MCP stdio 初始化/14 工具发现。离线样例测试与本表实站证据明确分开。
 
-本次实站使用可选的 Playwright CLI 会话桥接。Python Playwright 的独立持久化 Profile 入口另有渲染与会话测试；不声称所有新 Profile 在未登录时也可搜索。已授权 CLI 浏览器保持打开，`close_browser` 仅释放借用连接。
+本次实站使用可选的 Playwright CLI 会话桥接。Python Playwright 的独立持久化 Profile 入口另有渲染与会话测试；不声称所有新 Profile 在未登录时也可搜索。另通过真实 MCP 调用 `open_platform_session` 和 `close_browser` 复核释放语义：返回 `released_external_session`、关闭浏览器数 0、释放会话数 1；随后直接读取该浏览器仍成功。已授权 CLI 浏览器保持打开。关闭工具输出类型已修复，并加入 stdio 测试。
 
 得物、美团本轮未完成实站自动检索验收。官方 API 未配置，商家信誉、全量差评、地区/优惠资格、库存与实付价格未验证。不加购、不下单、不支付；不合并 main。CI 状态以对应提交的 GitHub Actions 记录为准。

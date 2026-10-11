@@ -30,4 +30,7 @@ def test_stdio_initialize_discovery_and_safe_call():
                 response = await session.call_tool("list_platforms", {})
                 assert not response.isError
                 assert "taobao" in str(response.content)
+                closed = await session.call_tool("close_browser", {})
+                assert not closed.isError
+                assert closed.structuredContent["browsers_closed"] == 0
     asyncio.run(run())

@@ -97,7 +97,7 @@ def prepare_purchase_review(platform: str, product_url: str, title: str,
 
 
 @mcp.tool()
-async def close_browser() -> dict[str, str]:
+async def close_browser() -> dict[str, Any]:
     """Close owned browsers or release a borrowed CLI session; preserve login profiles."""
     try:
         return await browser.close()

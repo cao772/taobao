@@ -57,5 +57,12 @@
     "shortlist_count": 3,
     "priced_shortlist_count": 3
   },
-  "checkout_verified": false
+  "checkout_verified": false,
+  "cleanup_verification": {
+    "observed_at_utc": "2026-10-11T03:55:30.762488+00:00",
+    "status": "released_external_session",
+    "browsers_closed": 0,
+    "external_sessions_released": 1,
+    "borrowed_browser_still_available": true
+  }
 }

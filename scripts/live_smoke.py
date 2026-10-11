@@ -10,6 +10,8 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 def unpack(reply):
+    if reply.isError:
+        raise RuntimeError('MCP 工具返回错误，停止验收，不能记作成功')
     return reply.structuredContent or json.loads(reply.content[0].text)
 
 async def run(args):
@@ -39,9 +41,9 @@ async def run(args):
                 research_summary = {'status': research['status'], 'shortlist_count': len(research['shortlist']),
                                     'priced_shortlist_count': sum(i.get('displayed_price_yuan') is not None for i in research['shortlist'])}
             finally:
-                await session.call_tool('close_browser', {})
+                cleanup = unpack(await session.call_tool('close_browser', {}))
             report = {'observed_at_utc': datetime.now(timezone.utc).isoformat(), 'keyword': args.keyword,
-                      'tool_count': len(names), 'platforms': observations, 'targeted_reviews': targeted_reviews, 'research': research_summary, 'checkout_verified': False}
+                      'tool_count': len(names), 'platforms': observations, 'targeted_reviews': targeted_reviews, 'research': research_summary, 'cleanup': cleanup, 'checkout_verified': False}
             if args.output:
                 Path(args.output).parent.mkdir(parents=True, exist_ok=True)
                 Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n')
