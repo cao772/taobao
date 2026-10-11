@@ -14,11 +14,12 @@ from .orchestration import search_all_platforms as _search_all_platforms, resear
 browser = PlatformBrowserPool()
 
 # Imported at launch, not required for unit-testing core functions.
+from mcp.types import ToolAnnotations
 from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("multimall-shopping")
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 def list_platforms() -> dict[str, Any]:
     """List six supported platforms, their browser-entry status and official API prerequisites."""
     return {
@@ -35,7 +36,7 @@ def list_platforms() -> dict[str, Any]:
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def search_products(platform: str, keyword: str, limit: int = 10) -> dict[str, Any]:
     """Open a visible local browser to search ONE platform; return only observed links/prices.
 
@@ -49,7 +50,7 @@ async def search_products(platform: str, keyword: str, limit: int = 10) -> dict[
         return {"status": "error", "reason": str(e)[:320]}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def get_product_detail(url: str) -> dict[str, Any]:
     """Read a user-approved product page from allowlisted platforms (visible local browser).
 
@@ -61,7 +62,7 @@ async def get_product_detail(url: str) -> dict[str, Any]:
         return {"status": "error", "reason": str(e)[:320]}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 def compare_products(products_json: str, budget_yuan: float | None = None,
                      include_secondhand: bool = False, location: str = "") -> dict[str, Any]:
     """Compare supplied observed offers across platforms; never fabricate missing data.
@@ -79,7 +80,7 @@ def compare_products(products_json: str, budget_yuan: float | None = None,
         return {"status": "invalid_input", "reason": str(e)[:320]}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 def prepare_purchase_review(platform: str, product_url: str, title: str,
                             maximum_budget_yuan: float) -> dict[str, Any]:
     """Prepare a human shopping review checklist; NEVER place, reserve, or pay an order."""
@@ -96,7 +97,7 @@ def prepare_purchase_review(platform: str, product_url: str, title: str,
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def close_browser() -> dict[str, Any]:
     """Close owned browsers or release a borrowed CLI session; preserve login profiles."""
     try:
@@ -106,7 +107,7 @@ async def close_browser() -> dict[str, Any]:
 
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def search_all_platforms(keyword: str,
                                platforms_json: str = '["taobao","jd","pdd"]',
                                per_platform_limit: int = 8) -> dict[str, Any]:
@@ -123,7 +124,7 @@ async def search_all_platforms(keyword: str,
         return {"status": "invalid_input", "reason": str(e)[:320]}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 def match_same_products(products_json: str) -> dict[str, Any]:
     """Group SKU candidates using explicit brand/model/specification/condition only.
 
@@ -136,7 +137,7 @@ def match_same_products(products_json: str) -> dict[str, Any]:
         return {"status": "invalid_input", "reason": str(e)[:320]}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 def analyze_product_reviews(reviews_json: str) -> dict[str, Any]:
     """Summarize caller-supplied review excerpts and recurring defect signals.
 
@@ -149,7 +150,7 @@ def analyze_product_reviews(reviews_json: str) -> dict[str, Any]:
         return {"status": "invalid_input", "reason": str(e)[:320]}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 def recommend_best_products(products_json: str,
                             budget_yuan: float | None = None,
                             include_secondhand: bool = False,
@@ -166,23 +167,45 @@ def recommend_best_products(products_json: str,
         return {"status": "invalid_input", "reason": str(e)[:320]}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def research_purchase(keyword: str, budget_yuan: float | None = None,
                             platforms_json: str = '["taobao","jd","pdd"]',
                             include_secondhand: bool = False,
                             location: str = "", per_platform_limit: int = 8,
-                            inspect_reviews_top_k: int = 0) -> dict[str, Any]:
+                            inspect_reviews_top_k: int = 2, inspect_details_top_k: int = 3) -> dict[str, Any]:
     """One-call shopping research: search -> provenance -> provisional shortlist.
 
-    Optionally (inspect_reviews_top_k=1..3) inspect visible review-like DOM text
+    By default inspect up to three shortlisted detail pages and two review sections.
+    Optionally (inspect_reviews_top_k=0..3) inspect visible review-like DOM text
     for shortlisted product pages; absent reviews must never become a quality score.
     """
     try:
         if not 0 <= inspect_reviews_top_k <= 3:
             raise ValueError("inspect_reviews_top_k 必须是 0-3")
+        if not 0 <= inspect_details_top_k <= 3:
+            raise ValueError("inspect_details_top_k 必须是 0-3")
         platforms = json.loads(platforms_json)
         result = await _research_purchase(browser.search, keyword, platforms, budget_yuan,
                                           include_secondhand, location, per_platform_limit)
+        result["checkout_verified"] = False
+        result["checked"] = ["visible_search_links", "displayed_prices", "platform_coverage"]
+        result["missing"] = ["authenticated_checkout_price", "verified_purchase_reviews", "certified_merchant_reputation"]
+        if result["status"] == "provisional_results":
+            enriched = []
+            for item in result["shortlist"][:inspect_details_top_k]:
+                detail = await get_product_detail(item["url"])
+                item["detail_evidence"] = detail
+                fields = detail.get("data") or {}
+                attributes = fields.get("attributes", {})
+                item["structured_identity"] = {key: attributes.get(key, {}).get("value", "") for key in ("brand", "model", "unit")}
+                item["structured_identity"]["specification"] = fields.get("selected_specification", "")
+                item["structured_identity"]["condition"] = "unknown"
+                item["missing_identity_fields"] = [key for key in ("brand", "model", "specification", "condition") if item["structured_identity"].get(key) in ("", "unknown")]
+                enriched.append({**item, **item["structured_identity"]})
+                item["decision_reasons"] = ["展示价在预算内；同 SKU、运费与优惠资格仍待核验"]
+            result["checked"].append("shortlisted_visible_product_parameters")
+            result["detail_identity_check"] = _match_same_products(enriched) if enriched else {"status":"not_checked"}
+            result["missing"].append("same_sku_confirmation_if_identity_fields_missing")
         if result["status"] == "provisional_results" and inspect_reviews_top_k > 0:
             for item in result["shortlist"][:inspect_reviews_top_k]:
                 evidence = await get_visible_reviews(item["url"], limit=20)
@@ -195,7 +218,7 @@ async def research_purchase(keyword: str, budget_yuan: float | None = None,
 
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def get_visible_reviews(product_url: str, limit: int = 20) -> dict[str, Any]:
     """Read visible review-like text and summarize it, without inventing quality scores.
 
@@ -214,7 +237,7 @@ async def get_visible_reviews(product_url: str, limit: int = 20) -> dict[str, An
                 "reviews": [], "summary": _analyze_reviews([])}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def open_platform_session(platform: str, keyword: str = "") -> dict[str, Any]:
     """Open a dedicated persistent browser for human login/search. No credentials accepted.
 
@@ -227,7 +250,7 @@ async def open_platform_session(platform: str, keyword: str = "") -> dict[str, A
         return {"status": "error", "reason": "无法打开专用会话；检查平台、浏览器安装及 Profile 占用。"}
 
 
-@mcp.tool()
+@mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def inspect_platform_session(platform: str, limit: int = 10) -> dict[str, Any]:
     """Read current platform page after human login, without navigating or reloading.
 

@@ -6,6 +6,7 @@ by authorized API-backed providers without changing MCP tool contracts.
 from __future__ import annotations
 
 import asyncio
+import re
 from collections.abc import Awaitable, Callable
 from typing import Any
 
@@ -99,17 +100,29 @@ async def research_purchase(provider: SearchProvider, query: str,
                             per_platform_limit: int = 8) -> dict[str, Any]:
     discovery = await search_all_platforms(provider, query, platforms, per_platform_limit)
     candidates = discovery["products"]
+    intent_excluded = []
+    if "开发板" in query or ("esp32" in query.casefold() and "amoled" in query.casefold()):
+        eligible = []
+        for row in candidates:
+            title = row["title"]
+            mismatch = (re.search(r"软件资源|资源分享|表情包|OTA替换|仅外壳|保护壳|裸屏|不含[主开]|外壳", title) and not re.search(r"含开发板|附开发板|开发板套装|开发板(?:[+＋]|带|含)外壳", title))
+            if mismatch:
+                intent_excluded.append({"url":row["url"], "title":title, "reason":"标题明确指向配件/数字资源；不作为整块开发板推荐", "evidence_source":"visible_search_title_not_product_parameters"})
+            else:
+                eligible.append(row)
+        candidates = eligible
     if not candidates:
         return {
             "status": "needs_more_evidence",
             "discovery": discovery,
-            "shortlist": [],
+            "shortlist": [], "intent_excluded": intent_excluded,
             "reason": "没有任何平台返回可核实的商品记录；不能给出推荐。",
             "next_step": "检查真实登录/权限/页面变化，或由用户提供具体商品链接。",
         }
     ranked = recommend_products(candidates, budget_yuan, include_secondhand, location)
     return {
         "status": "provisional_results",
+        "intent_excluded": intent_excluded,
         "discovery": {k: v for k, v in discovery.items() if k != "products"},
         "shortlist": ranked["recommendations"],
         "recommendation_analysis": {k: v for k, v in ranked.items() if k != "recommendations"},

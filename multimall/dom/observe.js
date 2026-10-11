@@ -48,7 +48,7 @@
   const url = new URL(location.href);
   const loginFrame = [...document.querySelectorAll('iframe')].some(n => visible(n) && /(?:login|passport)/i.test(n.src));
   const loginForm = [...document.querySelectorAll('input[type="password"], input[placeholder*="手机号"], input[placeholder*="验证码"]')].some(visible);
-  const challenge = /(?:risk_handler|captcha|verify|punish)/i.test(url.pathname) || /(?:验证|安全检查)/.test(document.title) || /请完成验证|拖动滑块|访问过于频繁|访问被拒绝/.test(bodyText);
+  const challenge = /(?:risk_handler|captcha|verify|punish)/i.test(url.pathname) || /(?:验证|安全检查)/.test(document.title) || /请完成验证|拖动滑块|访问过于频繁|访问被拒绝|访问异常提示|当前访问存在异常|恢复正常访问方式/.test(bodyText);
   const login = /^(?:login|passport)\./.test(url.hostname) || /\/(?:login|signin)(?:[./]|$)/i.test(url.pathname) || loginFrame || loginForm;
   let state = challenge ? 'verification_required' : login ? 'login_required' : 'ready';
   const products = [], unlinked_products = [], reviews = [], seen = new Set();
@@ -78,7 +78,9 @@
       if (reviews.length >= limit) break;
       const text = clean(node).slice(0,800);
       if (text.length < 4 || seen.has(text)) continue;
-      seen.add(text); reviews.push({text, selector});
+      const parent = node.closest('[class*="Comment--"], .comment-item, [class*="review-item"]');
+      const date = parent ? first(parent, ['time', '[class*="meta--"]', '.order-info']) : {text:''};
+      seen.add(text); reviews.push({text, selector, review_date_text: date.text.slice(0,120)});
     }
   }
   if (state === 'ready' && !products.length && !unlinked_products.length && mode === 'products') state = /加载中|正在加载/.test(bodyText) ? 'loading' : 'no_extractable_products';

@@ -4,6 +4,8 @@ from importlib.resources import files
 from urllib.parse import urlparse, parse_qs, urlencode
 from .core import allowlisted_url, platform_from_url
 
+DETAIL_JS = files('multimall').joinpath('dom/detail.js').read_text(encoding='utf-8')
+
 OBSERVE_JS = files('multimall').joinpath('dom/observe.js').read_text(encoding='utf-8')
 
 

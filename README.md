@@ -22,14 +22,17 @@ python3 -m venv .venv
 
 ```json
 {
-  "keyword": "ESP32-S3 AMOLED",
+  "keyword": "ESP32-S3 AMOLED开发板",
   "budget_yuan": 200,
   "platforms_json": "[\"taobao\",\"jd\",\"pdd\",\"xianyu\"]",
   "include_secondhand": true,
   "per_platform_limit": 5,
-  "inspect_reviews_top_k": 2
+  "inspect_reviews_top_k": 2,
+  "inspect_details_top_k": 3
 }
 ```
+
+Issue #3 的参数、SKU、评论证据及客户端迭代说明见 [本轮实现](docs/issue-3-implementation.md)。一次研究默认检查前三个候选详情、前两个评价区；显式配件/数字资源标题会从开发板推荐中剔除。
 
 完整会话说明、可选的现有 Playwright CLI 会话复用、真实 MCP 复验脚本见 [接入说明](docs/live-integration.md)。不设置 CLI 会话变量时直接用 Python Playwright。
 

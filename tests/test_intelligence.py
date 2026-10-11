@@ -186,3 +186,28 @@ def test_source_unverified_not_cloaked_as_real_checkout():
     r = recommend_products([offer(price_status="checkout_verified")])
     assert "结算页核实" in r["warnings"][2]
     assert r["recommendations"][0]["same_sku_confirmed"] is False
+
+
+def test_review_trace_dedup_and_later_failure():
+    rows = [{"text": "开始没有故障，后来故障死机", "source_url": "https://item.jd.com/123.html", "observed_at_utc": "2026-10-11T01:00:00Z"}]*2
+    result = analyze_reviews(rows)
+    assert result['sample_size'] == 1
+    assert result['duplicate_snippets_removed'] == 1
+    assert result['risk_entries'][0]['evidence_ids'] == [result['review_evidence'][0]['evidence_id']]
+    assert result['review_evidence'][0]['text'] == rows[0]['text']
+    assert result['quality_score'] is None
+
+
+def test_pack_and_product_form_prevent_false_merge():
+    for changes in ({'pack_count':2}, {'product_form':'bare_display'}, {'unit':'套'}):
+        rows = [offer(pack_count=1, product_form='development_board', unit='个'), offer(url='https://item.jd.com/124.html', pack_count=1, product_form='development_board', unit='个') | changes]
+        assert not match_same_products(rows)['candidate_groups']
+
+
+def test_board_research_excludes_explicit_digital_resources_and_cases():
+    async def provider(platform,query,limit):
+        return {'status':'observed','products':[offer(title='ESP32-S3 AMOLED 开发板外壳'),offer(url='https://item.jd.com/124.html',title='软件资源分享ESP32-S3 AMOLED开发板'),offer(url='https://item.jd.com/125.html',title='ESP32-S3 AMOLED开发板') ]}
+    result=asyncio.run(research_purchase(provider,'ESP32-S3 AMOLED开发板',['jd']))
+    assert len(result['intent_excluded']) == 2
+    assert len(result['shortlist']) == 1
+    assert result['shortlist'][0]['url'].endswith('/125.html')

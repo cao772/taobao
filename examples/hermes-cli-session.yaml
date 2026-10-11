@@ -1,0 +1,10 @@
+# Merge into ~/.hermes/config.yaml; run clients sequentially when sharing CLI tabs.
+mcp_servers:
+  multimall:
+    command: "/ABS/PATH/multimall/.venv/bin/python"
+    args: ["-m", "multimall.server"]
+    connect_timeout: 30
+    timeout: 900
+    env:
+      MULTIMALL_PLAYWRIGHT_SESSION: "multimall-live"
+      MULTIMALL_PLAYWRIGHT_CLI: "/ABS/PATH/playwright-cli"

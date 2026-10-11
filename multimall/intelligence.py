@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from decimal import Decimal
 import re
+import hashlib
 from typing import Any
 
 from .core import PLATFORMS, allowlisted_url, parse_price, platform_from_url
@@ -47,6 +48,10 @@ def validated_offer(row: dict[str, Any]) -> dict[str, Any]:
         "model": str(row.get("model") or "")[:120],
         "specification": str(row.get("specification") or "")[:200],
         "condition": condition,
+        "product_form": str(row.get("product_form") or "unknown")[:80],
+        "unit": str(row.get("unit") or "unknown")[:80],
+        "pack_count": row.get("pack_count"),
+        "detail_evidence": row.get("detail_evidence", {}),
         "merchant": str(row.get("merchant") or "")[:120],
         "displayed_price_yuan": str(price) if price else None,
         "price_status": str(row.get("price_status") or "unverified_display")[:60],
@@ -71,7 +76,7 @@ def identity_key(row: dict[str, Any]) -> str | None:
     brand, model, spec = (_identity(row.get(key)) for key in ("brand", "model", "specification"))
     if not brand or not model or not spec or row.get("condition", "unknown") == "unknown":
         return None
-    return "|".join((brand, model, spec, row["condition"]))
+    return "|".join((brand, model, spec, row["condition"], _identity(row.get("product_form", "unknown")), _identity(row.get("unit", "unknown")), str(row.get("pack_count"))))
 
 
 def match_same_products(products: list[dict[str, Any]]) -> dict[str, Any]:
@@ -87,13 +92,16 @@ def match_same_products(products: list[dict[str, Any]]) -> dict[str, Any]:
             if key is None:
                 unmatched.append({"index": i, "url": row["url"], "title": row["title"], "reason": "brand/model/specification/condition 缺失，不能认定同款"})
             else:
-                groups[key].append({"index": i, "url": row["url"], "platform": row["platform"], "displayed_price_yuan": row["displayed_price_yuan"]})
+                groups[key].append({"index": i, "url": row["url"], "platform": row["platform"], "displayed_price_yuan": row["displayed_price_yuan"], "merchant": row["merchant"], "observed_at_utc": row["observed_at_utc"], "source": row["source"], "missing_comparability_fields": [f for f in ("unit", "pack_count", "product_form") if row.get(f) in (None, "unknown", "")]})
         except (ValueError, TypeError) as e:
             errors.append({"index": i, "reason": str(e)})
     return {
         "status": "partial" if errors else "ok",
         "candidate_groups": [
-            {"identity_key": k, "match_status": "structured_fields_agree_manual_confirmation_required", "offers": v}
+            {"identity_key": k, "match_status": "structured_fields_agree_manual_confirmation_required", "offers": sorted(v, key=lambda r: Decimal(r["displayed_price_yuan"]) if r["displayed_price_yuan"] else Decimal("Infinity")),
+             "distinct_named_merchants": len({(r["platform"],r["merchant"]) for r in v if r["merchant"]}),
+             "display_price_range_yuan": [str(min(prices)), str(max(prices))] if (prices := [Decimal(r["displayed_price_yuan"]) for r in v if r["displayed_price_yuan"]]) else None,
+             "checkout_verified": False}
             for k, v in sorted(groups.items()) if len(v) >= 2
         ],
         "singletons": [
@@ -114,12 +122,19 @@ def analyze_reviews(reviews: list[dict[str, Any]]) -> dict[str, Any]:
     positive = negative = rated = 0
     ratings = []
     accepted = []
+    seen = set()
+    duplicates = 0
     for i, row in enumerate(reviews):
         if not isinstance(row, dict):
             continue
         txt = str(row.get("text") or "").strip()[:2000]
         if not txt:
             continue
+        fingerprint = (str(row.get("source_url") or ""), re.sub(r"\s+", "", txt).casefold())
+        if fingerprint in seen:
+            duplicates += 1
+            continue
+        seen.add(fingerprint)
         rated_value = row.get("rating")
         if isinstance(rated_value, (int, float)) and not isinstance(rated_value, bool) and 1 <= rated_value <= 5:
             ratings.append(float(rated_value))
@@ -128,26 +143,27 @@ def analyze_reviews(reviews: list[dict[str, Any]]) -> dict[str, Any]:
         lowered = txt.lower()
         for topic, words in _NEGATIVE_TOPICS.items():
             for word in words:
-                position = lowered.find(word.lower())
-                if position < 0:
-                    continue
-                prefix = lowered[max(0, position - 4):position]
-                # Short negation phrase: "没有故障" shouldn't count as a fault.
-                if any(prefix.endswith(neg) for neg in _NEGATE):
-                    continue
-                hits.append(topic)
-                break
+                positions = [m.start() for m in re.finditer(re.escape(word.lower()), lowered)]
+                if any(not any(lowered[max(0, pos - 4):pos].endswith(neg) for neg in _NEGATE) for pos in positions):
+                    hits.append(topic)
+                    break
         if hits:
             negative += 1
             topic_counts.update(hits)
         elif any(w in lowered for w in _POSITIVE):
             positive += 1
         accepted.append({"index": i, "issue_topics": hits,
+                         "evidence_id": hashlib.sha256((fingerprint[0]+"\n"+fingerprint[1]).encode()).hexdigest()[:16],
+                         "text": txt, "observed_at_utc": str(row.get("observed_at_utc") or "")[:60],
+                         "review_date_text": str(row.get("review_date_text") or "")[:120],
+                         "visibility": "supplied_snippet", "extraction_selector": str(row.get("extraction_selector") or "")[:160],
                          "source_url": str(row.get("source_url") or "")[:300]})
     n = len(accepted)
     return {
         "status": "no_review_evidence" if n == 0 else "evidence_summary",
         "sample_size": n,
+        "duplicate_snippets_removed": duplicates,
+        "risk_entries": [{"topic": topic, "affected_samples": count, "evidence_ids": [r["evidence_id"] for r in accepted if topic in r["issue_topics"]], "assessment": "reported_concern_not_verified_defect"} for topic, count in topic_counts.items()],
         "rating_samples": rated,
         "mean_rating_from_supplied_samples": round(sum(ratings) / rated, 2) if rated else None,
         "positive_keyword_mentions": positive,

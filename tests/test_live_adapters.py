@@ -61,7 +61,7 @@ def test_reviews_are_content_only_visible_and_deduplicated():
       <div class="comment-item" style="display:none"><p class="comment-con">不可见评价</p></div>
       <div class="comment-item"><p class="comment-con">屏幕有破损，售后不处理</p></div>'''
     rows = asyncio.run(observe(html, mode='reviews'))['reviews']
-    assert rows == [{'text':'屏幕有破损，售后不处理','selector':'.comment-item .comment-con'}]
+    assert rows == [{'text':'屏幕有破损，售后不处理','selector':'.comment-item .comment-con','review_date_text':''}]
 
 
 def test_non_product_and_sensitive_query_protection():
@@ -137,3 +137,26 @@ def test_current_taobao_reviews_exclude_username_date_and_heading():
     rows = asyncio.run(observe(html,platform='taobao',url='https://item.taobao.com/item.htm?id=123',mode='reviews'))['reviews']
     assert len(rows) == 1
     assert rows[0]['text'] == '做工很好，屏幕很清晰。'
+
+
+def test_access_restriction_never_returns_residual_reviews():
+    result = asyncio.run(observe('<h1>访问异常提示</h1><div class="comment-item"><p class="comment-con">好用满意</p></div>', mode='reviews'))
+    assert result['state'] == 'verification_required'
+    assert result['reviews'] == []
+
+
+def test_detail_selected_variant_separate_from_available_options():
+    from multimall.adapters import DETAIL_JS
+    async def run():
+        async with async_playwright() as pw:
+            browser = await pw.chromium.launch(headless=True)
+            page = await browser.new_page()
+            await page.set_content('''<ul id="parameter2"><li>品牌：Waveshare</li><li>型号：ESP32-S3</li></ul><div id="choose-attrs"><div class="item selected">N16R8</div><div class="item">N8R8</div></div><div>收货地址 隐私内容</div>''')
+            result = await page.evaluate(DETAIL_JS, {'platform':'jd'})
+            await browser.close()
+            return result
+    result = asyncio.run(run())
+    assert result['attributes']['brand']['value'] == 'Waveshare'
+    assert result['selected_specification'] == 'N16R8'
+    assert len(result['sku_options']) == 2
+    assert '隐私内容' not in str(result)

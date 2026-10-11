@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timezone
 import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from .adapters import OBSERVE_JS, product_url, safe_page_url
+from .adapters import DETAIL_JS, OBSERVE_JS, product_url, safe_page_url
 from .core import PLATFORMS, allowlisted_url, make_offer, platform_from_url, search_url
 
 _MESSAGES = {
@@ -189,11 +190,27 @@ class ReadOnlyBrowser:
             found = await self._observe(platform, mode='detail', wait=False)
             if found['state'] != 'ready':
                 return {'status': found['state'], 'reason': _MESSAGES.get(found['state'], ''), 'data': None}
-            data = await self._page.evaluate(r"""() => {
-              const visible = n => n && n.getBoundingClientRect().width && n.getBoundingClientRect().height && getComputedStyle(n).visibility !== 'hidden';
-              const body = [...document.querySelectorAll('h1, [class*=title], [class*=price]')].filter(visible).map(n => n.innerText).filter(Boolean).slice(0,20);
-              return {title: document.title, visible_product_texts: body, candidate_price_texts: (body.join(' ').match(/[￥¥]\s*\d+(?:\.\d{1,2})?/g) || []).slice(0,8), page_excerpt: body.join(' ').slice(0,4000)};
-            }""")
+            data = await self._page.evaluate(DETAIL_JS, {'platform': platform})
+            if platform == 'jd' and not data['attributes']:
+                # Read-only product specifications control; never click SKU/cart/buy controls.
+                try:
+                    if hasattr(self._page, 'reveal_parameters'):
+                        clicked = await self._page.reveal_parameters()
+                    else:
+                        control = self._page.locator('.parameter').first
+                        clicked = bool(await control.count() and await control.is_visible())
+                        if clicked:
+                            await control.click(timeout=5000)
+                            await asyncio.sleep(1.2)
+                    if clicked:
+                        gate = await self._observe(platform, mode='detail', wait=False)
+                        if gate['state'] != 'ready':
+                            return {'status':gate['state'], 'data':None}
+                        data = await self._page.evaluate(DETAIL_JS, {'platform':platform})
+                        data['parameter_control_action'] = 'opened_visible_specs_control'
+                except Exception:
+                    data['parameter_control_action'] = 'unavailable'
+            data['observed_at_utc'] = datetime.now(timezone.utc).isoformat()
             data['url'] = safe_page_url(self._page.url)
             return {'status': 'observed', 'platform': platform, 'data': data,
                     'data_source': 'live_visible_browser_not_checkout_verified',
@@ -212,7 +229,9 @@ class ReadOnlyBrowser:
                 return {**error, 'reviews': []}
             found = await self._observe(platform, limit, mode='reviews')
             rows = [{'text': r['text'], 'source_url': safe_page_url(self._page.url),
-                     'extraction_selector': r['selector'], 'verified_purchase': None} for r in found.get('reviews', [])]
+                     'extraction_selector': r['selector'], 'verified_purchase': None,
+                     'review_date_text': r.get('review_date_text', ''),
+                     'observed_at_utc': datetime.now(timezone.utc).isoformat()} for r in found.get('reviews', [])]
             status = found['state'] if found['state'] != 'ready' else ('observed' if rows else 'no_visible_reviews')
             return {'status': status, 'platform': platform, 'reviews': rows, 'review_count': len(rows),
                     'page_url': safe_page_url(self._page.url), 'reason': _MESSAGES.get(status, ''),

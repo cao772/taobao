@@ -69,6 +69,11 @@ class CliPage:
         operation = 'if (!matches(page)) return {url:safe(),value:{state:"unexpected_redirect",products:[],reviews:[]}}; const value=await page.evaluate(' + expression + ', ' + json.dumps(arg) + '); return {url:safe(),value};'
         return await self._run(operation)
 
+    async def reveal_parameters(self):
+        if self.platform != 'jd':
+            return False
+        return await self._run('const control=page.locator(".parameter").first(); let clicked=false; if(await control.count() && await control.isVisible()) { await control.click({timeout:5000}); await page.waitForTimeout(1200); clicked=true; } return {url:safe(),value:clicked};')
+
     async def resolve_card_link(self, row):
         if self.platform != 'pdd' or row['evidence']['card_selector'] != '._3glhOBhU' or row['evidence']['title_selector'] != '._3ANzdjkc':
             return None
