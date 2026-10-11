@@ -24,7 +24,8 @@ def list_platforms() -> dict[str, Any]:
     return {
         "platforms": {key: {
             "name": value["name"], "type": value["kind"],
-            "browser": "best_effort_visible_read_only",
+            "browser": "platform_visible_dom_adapter" if key in ("taobao", "jd", "pdd", "xianyu") else "manual_only",
+            "session_tools": ["open_platform_session", "inspect_platform_session"],
             "api": value["api"],
             "api_connected": False,
             "guaranteed_live_search": False,
@@ -97,7 +98,7 @@ def prepare_purchase_review(platform: str, product_url: str, title: str,
 
 @mcp.tool()
 async def close_browser() -> dict[str, str]:
-    """Close the dedicated shopping browser; does not clear session cookies from profile."""
+    """Close owned browsers or release a borrowed CLI session; preserve login profiles."""
     try:
         return await browser.close()
     except Exception as e:
@@ -211,6 +212,31 @@ async def get_visible_reviews(product_url: str, limit: int = 20) -> dict[str, An
     except Exception as e:
         return {"status": "error", "reason": str(e)[:280],
                 "reviews": [], "summary": _analyze_reviews([])}
+
+
+@mcp.tool()
+async def open_platform_session(platform: str, keyword: str = "") -> dict[str, Any]:
+    """Open a dedicated persistent browser for human login/search. No credentials accepted.
+
+    Login/verification is handled by the user in the browser. Keep this MCP process
+    alive, then call inspect_platform_session to read without reloading the page.
+    """
+    try:
+        return await browser.open_session(platform, keyword)
+    except Exception:
+        return {"status": "error", "reason": "无法打开专用会话；检查平台、浏览器安装及 Profile 占用。"}
+
+
+@mcp.tool()
+async def inspect_platform_session(platform: str, limit: int = 10) -> dict[str, Any]:
+    """Read current platform page after human login, without navigating or reloading.
+
+    This reports observable page state, not an authenticated identity guarantee.
+    """
+    try:
+        return await browser.inspect_session(platform, limit)
+    except Exception:
+        return {"status": "error", "reason": "当前会话读取失败，请检查浏览器窗口。"}
 
 
 def main() -> None:

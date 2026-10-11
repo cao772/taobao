@@ -178,7 +178,7 @@ def compare_offers(payload: list[dict[str, Any]], budget_yuan: float | None = No
                 "specification": str(item.get("specification", ""))[:200],
                 "source": item.get("source", "user_supplied"),
                 "price_status": item.get("price_status", "unverified_display"),
-                "eligible": (condition != "used" or include_secondhand) and
+                "eligible": ((condition != "used" and PLATFORMS[p]["kind"] != "secondhand") or include_secondhand) and
                     (p != "meituan" or bool(location)) and price is not None and
                     (budget_yuan is None or price <= Decimal(str(budget_yuan))),
             })

@@ -57,6 +57,8 @@ def validated_offer(row: dict[str, Any]) -> dict[str, Any]:
         "seller_rating": row.get("seller_rating"),
         "seller_rating_count": row.get("seller_rating_count"),
         "return_policy": row.get("return_policy"),
+        "raw_price_text": str(row.get("raw_price_text") or "")[:120],
+        "evidence": row.get("evidence") if isinstance(row.get("evidence"), dict) else {},
     }
 
 
@@ -205,7 +207,7 @@ def recommend_products(products: list[dict[str, Any]], budget_yuan: float | None
         amount = parse_price(row["displayed_price_yuan"])
         if amount is None:
             reasons.append("无可解析的展示价")
-        if row["condition"] == "used" and not include_secondhand:
+        if (row["condition"] == "used" or PLATFORMS[row["platform"]]["kind"] == "secondhand") and not include_secondhand:
             reasons.append("未授权二手商品")
         if row["platform"] == "meituan" and not location.strip():
             reasons.append("美团商品缺少使用城市/配送地区")
@@ -226,6 +228,10 @@ def recommend_products(products: list[dict[str, Any]], budget_yuan: float | None
             "merchant": row["merchant"],
             "url": row["url"],
             "displayed_price_yuan": row["displayed_price_yuan"],
+            "observed_at_utc": row["observed_at_utc"],
+            "source": row["source"],
+            "evidence": row["evidence"],
+            "raw_price_text": row["raw_price_text"],
             "estimated_total_yuan": computed["estimated_total_yuan"],
             "price_explanation": computed["reason"],
             "identity_key": group,

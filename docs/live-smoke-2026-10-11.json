@@ -1,0 +1,61 @@
+{
+  "observed_at_utc": "2026-10-11T03:53:41.230261+00:00",
+  "keyword": "ESP32-S3 AMOLED",
+  "tool_count": 14,
+  "platforms": [
+    {
+      "platform": "taobao",
+      "status": "observed",
+      "product_count": 5,
+      "price_count": 5,
+      "adapter": "taobao_visible_dom_v1",
+      "reason": "",
+      "review_status": "observed",
+      "review_count": 2
+    },
+    {
+      "platform": "jd",
+      "status": "observed",
+      "product_count": 5,
+      "price_count": 5,
+      "adapter": "jd_visible_dom_v1",
+      "reason": "",
+      "review_status": "no_visible_reviews",
+      "review_count": 0
+    },
+    {
+      "platform": "pdd",
+      "status": "observed",
+      "product_count": 5,
+      "price_count": 5,
+      "adapter": "pdd_visible_dom_v1",
+      "reason": "",
+      "review_status": "no_visible_reviews",
+      "review_count": 0
+    },
+    {
+      "platform": "xianyu",
+      "status": "observed",
+      "product_count": 5,
+      "price_count": 5,
+      "adapter": "xianyu_visible_dom_v1",
+      "reason": "",
+      "review_status": "no_visible_reviews",
+      "review_count": 0
+    }
+  ],
+  "targeted_reviews": [
+    {
+      "product_url": "https://item.taobao.com/item.htm?id=1032106323206",
+      "status": "observed",
+      "review_count": 2,
+      "quality_score": null
+    }
+  ],
+  "research": {
+    "status": "provisional_results",
+    "shortlist_count": 3,
+    "priced_shortlist_count": 3
+  },
+  "checkout_verified": false
+}

@@ -63,7 +63,8 @@ async def search_all_platforms(provider: SearchProvider, query: str,
                 if status not in ("observed", "no_extractable_products",
                                   "manual_search_required", "navigation_error",
                                   "unexpected_redirect", "error", "blocked_url",
-                                  "invalid_platform"):
+                                  "invalid_platform", "login_required", "verification_required",
+                                  "loading", "session_not_open"):
                     status = "unknown"
                 if status != "observed":
                     offers = []  # avoid accidental leakage of stale/partial data

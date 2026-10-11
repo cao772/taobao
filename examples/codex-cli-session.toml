@@ -1,0 +1,8 @@
+# Optional: reuse an ALREADY OPEN and human-authorized Playwright CLI session.
+# Each requested platform must have an existing tab. No Cookie export/import.
+[mcp_servers.multimall]
+command = "/ABS/PATH/multimall/.venv/bin/python"
+args = ["-m", "multimall.server"]
+[mcp_servers.multimall.env]
+MULTIMALL_PLAYWRIGHT_SESSION = "multimall-live"
+MULTIMALL_PLAYWRIGHT_CLI = "/ABS/PATH/playwright-cli"

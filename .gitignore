@@ -5,3 +5,6 @@ __pycache__/
 .local/
 .env
 .env.*
+*.egg-info/
+.playwright-cli/
+output/
