@@ -1,0 +1,910 @@
+{
+  "client": "Hermes local CLI",
+  "kind": "completed_MCP_calls_no_spillover",
+  "calls": [
+    {
+      "tool": "mcp__multimall__list_platforms",
+      "arguments": {},
+      "observed_at_utc": "2026-10-12T01:42:57.131928+00:00",
+      "result": {
+        "platforms": {
+          "taobao": {
+            "name": "淘宝/天猫",
+            "type": "retail",
+            "browser": "platform_visible_dom_adapter",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "淘宝客物料搜索（需应用权限；商品覆盖有限）",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "jd": {
+            "name": "京东",
+            "type": "retail",
+            "browser": "platform_visible_dom_adapter",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "京东联盟商品查询（需联盟权限）",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "pdd": {
+            "name": "拼多多",
+            "type": "retail",
+            "browser": "platform_visible_dom_adapter",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "多多进宝商品搜索（需开放平台权限）",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "dewu": {
+            "name": "得物",
+            "type": "retail",
+            "browser": "manual_only",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "暂未集成官方消费端全站搜索；第三方商业接口须另行授权核实",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "xianyu": {
+            "name": "闲鱼",
+            "type": "secondhand",
+            "browser": "platform_visible_dom_adapter",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "闲鱼服务商接口通常需要准入/授权；非通用全站搜索",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          },
+          "meituan": {
+            "name": "美团",
+            "type": "local_service",
+            "browser": "manual_only",
+            "session_tools": [
+              "open_platform_session",
+              "inspect_platform_session"
+            ],
+            "api": "美团联盟商品查询（需联盟权限）；区域/门店/时段影响价格",
+            "api_connected": false,
+            "guaranteed_live_search": false,
+            "checkout_enabled": false
+          }
+        },
+        "notice": "官方联盟 API 尚未配置凭证；浏览器读取依赖用户环境与页面权限。"
+      }
+    },
+    {
+      "tool": "mcp__multimall__research_purchase",
+      "arguments": {
+        "keyword": "罗技 M185 无线鼠标",
+        "budget_yuan": 100,
+        "platforms_json": "[\"jd\",\"pdd\",\"xianyu\"]",
+        "per_platform_limit": 6,
+        "include_secondhand": true,
+        "inspect_details_per_platform": 1,
+        "inspect_details_top_k": 3,
+        "inspect_reviews_top_k": 2,
+        "compact": true
+      },
+      "observed_at_utc": "2026-10-12T01:44:31.768731+00:00",
+      "result": {
+        "status": "provisional_results",
+        "intent_excluded": [
+          {
+            "url": "https://www.goofish.com/item?id=1008047376455",
+            "title": "全新原装罗技g903/g903hero无线鼠标接收器 接收 头 接收器芯片全新原厂原装（不是自制芯片）壳子后配 如实描述 实物拍图 支持拆解比对 收货两天内确认非人为原因半年包换（运费各自承担） 包邮",
+            "reason": "标题指向鼠标配件；不作为整鼠推荐",
+            "evidence_source": "visible_search_title_not_product_parameters",
+            "title_truncated": true
+          },
+          {
+            "url": "https://www.goofish.com/item?id=1011303672898",
+            "title": "罗技双通道接收器 cu0010 罗技无线键鼠接收器，支持罗技多种型号键盘鼠标配对，非优联版，每个都贴有防伪标志，撕毁无效。 鼠标：M150/M170/M171/M185/M188/M205/M210/",
+            "reason": "标题指向鼠标配件；不作为整鼠推荐",
+            "evidence_source": "visible_search_title_not_product_parameters",
+            "title_truncated": true
+          },
+          {
+            "url": "https://www.goofish.com/item?id=1060660198514",
+            "title": "罗技G502无线鼠标接收器，罗技无线G502原厂接收器适配器 无线G502接收器原装包配对成功29包邮其他配件请咨询需要可以拍下无质量问题售出不退不换",
+            "reason": "标题指向鼠标配件；不作为整鼠推荐",
+            "evidence_source": "visible_search_title_not_product_parameters"
+          },
+          {
+            "url": "https://www.goofish.com/item?id=890476454162",
+            "title": "罗技M185无线鼠标接收器，罗技接收器/logitech接收 器/logi接收器。 卖的是接收器，接收器，接收器，请不要看错了。 请提供鼠标底部清晰照片，或根据下面的M/N号自己下单， [火]有下面3",
+            "reason": "标题指向鼠标配件；不作为整鼠推荐",
+            "evidence_source": "visible_search_title_not_product_parameters",
+            "title_truncated": true
+          },
+          {
+            "url": "https://www.goofish.com/item?id=919090940881",
+            "title": "罗技m330/b330/m275/m280/m185/m18 6/m220/m221/m170鼠标电池盖，拆机配件，适用于罗技各款鼠标。外观有正常使用痕迹，功能正常。有需要的朋友可以私聊，价格可谈，如",
+            "reason": "标题指向鼠标配件；不作为整鼠推荐",
+            "evidence_source": "visible_search_title_not_product_parameters",
+            "title_truncated": true
+          },
+          {
+            "url": "https://mobile.yangkeduo.com/goods.html?goods_id=936276993814",
+            "title": "HP拓展坞usb3.0高速传输四合一扩展hub集分线器转换器台式笔记本",
+            "reason": "详情展示品牌与指定罗技品牌不一致（不据此判定假货）",
+            "evidence_source": "visible_product_parameter",
+            "detail_evidence": {
+              "status": "observed",
+              "platform": "pdd",
+              "data": {
+                "attributes": {
+                  "brand": {
+                    "value": "HP/惠普",
+                    "label": "品牌",
+                    "selector": ".iUUH2sOQ",
+                    "text": "品牌 HP/惠普"
+                  }
+                },
+                "seller_description": null,
+                "merchant": null,
+                "sku_options": [],
+                "selected_specification": "",
+                "missing_fields": [
+                  "model",
+                  "unit",
+                  "condition"
+                ],
+                "notice": "只有明确选中的 SKU 可用于规格对比；可选列表不代表当前价格对应的 SKU。商品标题不作为参数证据。",
+                "observed_at_utc": "2026-10-12T01:44:01.433928+00:00",
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=936276993814"
+              },
+              "data_source": "live_visible_browser_not_checkout_verified",
+              "notice": "可见文本仅为页面证据，不把任意正文金额当作 SKU 售价。"
+            }
+          }
+        ],
+        "detail_coverage": [
+          {
+            "platform": "jd",
+            "url": "https://item.jd.com/10042275731805.html",
+            "status": "observed",
+            "structured_fields": [
+              "brand",
+              "model",
+              "product_id"
+            ],
+            "merge_status": "visible_structured_claims_only",
+            "structured_identity": {
+              "brand": "罗技（Logitech）",
+              "model": "M185",
+              "specification": "",
+              "condition": "unknown",
+              "unit": "unknown"
+            }
+          },
+          {
+            "platform": "pdd",
+            "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+            "status": "observed",
+            "structured_fields": [
+              "brand",
+              "model"
+            ],
+            "merge_status": "visible_structured_claims_only",
+            "structured_identity": {
+              "brand": "Logitech/罗技",
+              "model": "M185",
+              "specification": "",
+              "condition": "unknown",
+              "unit": "unknown"
+            }
+          },
+          {
+            "platform": "xianyu",
+            "url": "https://www.goofish.com/item?id=919588274330",
+            "status": "observed",
+            "structured_fields": [],
+            "merge_status": "visible_structured_claims_only",
+            "structured_identity": {
+              "brand": "",
+              "model": "",
+              "specification": "",
+              "condition": "unknown",
+              "unit": "unknown"
+            }
+          },
+          {
+            "platform": "pdd",
+            "url": "https://mobile.yangkeduo.com/goods.html?goods_id=936276993814",
+            "status": "observed",
+            "structured_fields": [
+              "brand"
+            ],
+            "merge_status": "visible_structured_claims_only",
+            "structured_identity": {
+              "brand": "HP/惠普",
+              "model": "",
+              "specification": "",
+              "condition": "unknown",
+              "unit": "unknown"
+            }
+          },
+          {
+            "platform": "jd",
+            "url": "https://item.jd.com/10088537675758.html",
+            "status": "observed",
+            "structured_fields": [
+              "brand",
+              "condition",
+              "product_id"
+            ],
+            "merge_status": "visible_structured_claims_only",
+            "structured_identity": {
+              "brand": "罗技（Logitech）",
+              "model": "",
+              "specification": "",
+              "condition": "unknown",
+              "unit": "unknown"
+            }
+          }
+        ],
+        "discovery": {
+          "status": "observed_all",
+          "query": "罗技 M185 无线鼠标",
+          "requested_platforms": [
+            "jd",
+            "pdd",
+            "xianyu"
+          ],
+          "observed_platforms": [
+            "jd",
+            "pdd",
+            "xianyu"
+          ],
+          "limited_platforms": [],
+          "per_platform": [
+            {
+              "platform": "jd",
+              "status": "observed",
+              "rejected_records": 0,
+              "reason": "仅包含当前页面可见商品字段；未知价格保持 null，展示价未经结算验证。",
+              "search_entry": "https://search.jd.com/Search?keyword=%E7%BD%97%E6%8A%80+M185+%E6%97%A0%E7%BA%BF%E9%BC%A0%E6%A0%87",
+              "product_count": 6,
+              "priced_product_count": 6
+            },
+            {
+              "platform": "pdd",
+              "status": "observed",
+              "rejected_records": 0,
+              "reason": "仅包含当前页面可见商品字段；未知价格保持 null，展示价未经结算验证。",
+              "search_entry": "https://mobile.yangkeduo.com/search_result.html?search_key=%E7%BD%97%E6%8A%80+M185+%E6%97%A0%E7%BA%BF%E9%BC%A0%E6%A0%87",
+              "product_count": 6,
+              "priced_product_count": 6
+            },
+            {
+              "platform": "xianyu",
+              "status": "observed",
+              "rejected_records": 0,
+              "reason": "仅包含当前页面可见商品字段；未知价格保持 null，展示价未经结算验证。",
+              "search_entry": "https://www.goofish.com/search?q=%E7%BD%97%E6%8A%80+M185+%E6%97%A0%E7%BA%BF%E9%BC%A0%E6%A0%87",
+              "product_count": 6,
+              "priced_product_count": 6
+            }
+          ],
+          "products_count": 18,
+          "source_notice": "仅汇总即时可见商品记录；受限平台不推断有无商品或价格。价格未经结算验证。"
+        },
+        "shortlist": [
+          {
+            "index": 11,
+            "title": "罗技鼠标M185无线鼠标办公电脑通用女生用小巧便携 门店倒闭了，剩下50个鼠标便宜处理了。都是全新未拆封的，功能正常。 电子产品放久了容易坏，尽快处理了。先到先得，错过这个村就没这个店了。 颜色：灰色，蓝色，红色 售后：收到有质量问题可退换 有意的人私信我。",
+            "platform": "xianyu",
+            "merchant": "谷神星冥想的彩虹鳗",
+            "brand": "",
+            "model": "",
+            "specification": "",
+            "condition": "unknown",
+            "unit": "unknown",
+            "pack_count": null,
+            "product_form": "unknown",
+            "url": "https://www.goofish.com/item?id=919588274330",
+            "displayed_price_yuan": "25.70",
+            "observed_at_utc": "2026-10-12T01:43:18.413266+00:00",
+            "source": "browser_observation",
+            "evidence": {
+              "card_selector": "a[class*=\"feeds-item-wrap\"]",
+              "title_selector": "[class*=\"main-title\"]",
+              "price_selector": "[class*=\"price-wrap\"]",
+              "merchant_selector": null,
+              "detail_source_url": "https://www.goofish.com/item?id=919588274330",
+              "detail_observed_at_utc": "2026-10-12T01:43:54.552037+00:00"
+            },
+            "raw_price_text": "¥ 25 .70",
+            "detail_evidence": {
+              "status": "observed",
+              "platform": "xianyu",
+              "data": {
+                "attributes": {},
+                "seller_description": {
+                  "selector": "[class^=\"desc--\"]",
+                  "assessment": "seller_description_claim_not_verified_parameters",
+                  "text_sha256": "a3c1f4e64d87ac204b1113da08de6aa718582b9818215c9eefed99a2f2a79d02",
+                  "text_excerpt": "罗技鼠标M185无线鼠标办公电脑通用女生用小巧便携 门店倒闭了，剩下50个鼠标便",
+                  "text_abbreviated_for_archive": true
+                },
+                "merchant": {
+                  "text": "谷神星冥想的彩虹鳗",
+                  "selector": "[class*=\"item-user-info-nick--\"]"
+                },
+                "sku_options": [],
+                "selected_specification": "",
+                "missing_fields": [
+                  "brand",
+                  "model",
+                  "unit",
+                  "condition"
+                ],
+                "notice": "只有明确选中的 SKU 可用于规格对比；可选列表不代表当前价格对应的 SKU。商品标题不作为参数证据。",
+                "observed_at_utc": "2026-10-12T01:43:54.552037+00:00",
+                "url": "https://www.goofish.com/item?id=919588274330",
+                "visible_parameter_count": 0,
+                "visible_sku_option_count": 0
+              },
+              "data_source": "live_visible_browser_not_checkout_verified",
+              "notice": "可见文本仅为页面证据，不把任意正文金额当作 SKU 售价。"
+            },
+            "structured_identity": {
+              "brand": "",
+              "model": "",
+              "specification": "",
+              "condition": "unknown",
+              "unit": "unknown"
+            },
+            "missing_identity_fields": [
+              "brand",
+              "model",
+              "specification",
+              "condition"
+            ],
+            "merchant_evidence": {
+              "text": "谷神星冥想的彩虹鳗",
+              "selector": "[class*=\"item-user-info-nick--\"]",
+              "assessment": "visible_display_claim_not_certified_reputation"
+            },
+            "estimated_total_yuan": null,
+            "price_explanation": "展示价/运费/优惠缺失或金额无效",
+            "identity_key": null,
+            "same_sku_confirmed": false,
+            "price_sku_verified": false,
+            "seller_evidence": "missing",
+            "quality_evidence": "missing_or_unverified",
+            "recommendation_basis": "displayed_price_only_no_quality_assessment",
+            "rank_within_identity_group": 1,
+            "decision_reasons": [
+              "展示价在预算内；同 SKU、运费与优惠资格仍待核验"
+            ],
+            "review_summary": {
+              "status": "no_review_evidence",
+              "sample_size": 0,
+              "duplicate_snippets_removed": 0,
+              "risk_entries": [],
+              "rating_samples": 0,
+              "mean_rating_from_supplied_samples": null,
+              "positive_keyword_mentions": 0,
+              "issue_review_mentions": 0,
+              "issue_topics": {},
+              "review_evidence": [],
+              "quality_score": null,
+              "evidence_level": "limited_unverified_snippets",
+              "caveat": "只分析传入的评论片段，未验证是否真实购买、刷评、样本是否有偏或覆盖全部差评；不输出产品质量分。",
+              "review_evidence_omitted": 0
+            },
+            "review_fetch_status": "no_visible_reviews"
+          },
+          {
+            "index": 1,
+            "title": "罗技M185无线办公鼠标带接收器",
+            "platform": "jd",
+            "merchant": "罗技二手官方旗舰店",
+            "brand": "罗技（Logitech）",
+            "model": "",
+            "specification": "",
+            "condition": "unknown",
+            "unit": "unknown",
+            "pack_count": null,
+            "product_form": "unknown",
+            "url": "https://item.jd.com/10088537675758.html",
+            "displayed_price_yuan": "31",
+            "observed_at_utc": "2026-10-12T01:43:06.508242+00:00",
+            "source": "browser_observation",
+            "evidence": {
+              "card_selector": ".plugin_goodsCardWrapper[data-sku]",
+              "title_selector": "[class*=\"_goods_title_container_\"]",
+              "price_selector": "span[class*=\"_price_\"]",
+              "merchant_selector": "span[class*=\"_name_\"]",
+              "detail_source_url": "https://item.jd.com/10088537675758.html",
+              "detail_observed_at_utc": "2026-10-12T01:44:14.512482+00:00"
+            },
+            "raw_price_text": "¥ 31",
+            "detail_evidence": {
+              "status": "observed",
+              "platform": "jd",
+              "data": {
+                "attributes": {
+                  "brand": {
+                    "value": "罗技（Logitech）",
+                    "label": "品牌",
+                    "selector": ".attribute .list .item",
+                    "text": "品牌 罗技（Logitech）"
+                  },
+                  "condition": {
+                    "value": "99成新",
+                    "label": "成色",
+                    "selector": ".attribute .list .item",
+                    "text": "成色 99成新"
+                  },
+                  "product_id": {
+                    "value": "10088537675758",
+                    "label": "商品编号",
+                    "selector": ".attribute .list .item",
+                    "text": "商品编号 10088537675758"
+                  }
+                },
+                "seller_description": null,
+                "merchant": null,
+                "sku_options": [],
+                "selected_specification": "",
+                "missing_fields": [
+                  "model",
+                  "unit"
+                ],
+                "notice": "只有明确选中的 SKU 可用于规格对比；可选列表不代表当前价格对应的 SKU。商品标题不作为参数证据。",
+                "parameter_control_action": "opened_visible_specs_control",
+                "observed_at_utc": "2026-10-12T01:44:14.512482+00:00",
+                "url": "https://item.jd.com/10088537675758.html",
+                "visible_parameter_count": 4,
+                "visible_sku_option_count": 0
+              },
+              "data_source": "live_visible_browser_not_checkout_verified",
+              "notice": "可见文本仅为页面证据，不把任意正文金额当作 SKU 售价。"
+            },
+            "structured_identity": {
+              "brand": "罗技（Logitech）",
+              "model": "",
+              "specification": "",
+              "condition": "unknown",
+              "unit": "unknown"
+            },
+            "missing_identity_fields": [
+              "model",
+              "specification",
+              "condition"
+            ],
+            "merchant_evidence": {},
+            "estimated_total_yuan": null,
+            "price_explanation": "展示价/运费/优惠缺失或金额无效",
+            "identity_key": null,
+            "same_sku_confirmed": false,
+            "price_sku_verified": false,
+            "seller_evidence": "missing",
+            "quality_evidence": "missing_or_unverified",
+            "recommendation_basis": "displayed_price_only_no_quality_assessment",
+            "rank_within_identity_group": 2,
+            "decision_reasons": [
+              "展示价在预算内；同 SKU、运费与优惠资格仍待核验"
+            ],
+            "review_summary": {
+              "status": "evidence_summary",
+              "sample_size": 3,
+              "duplicate_snippets_removed": 0,
+              "risk_entries": [],
+              "rating_samples": 0,
+              "mean_rating_from_supplied_samples": null,
+              "positive_keyword_mentions": 2,
+              "issue_review_mentions": 0,
+              "issue_topics": {},
+              "review_evidence": [
+                {
+                  "index": 0,
+                  "issue_topics": [],
+                  "evidence_id": "8f06ad2331cc7167",
+                  "observed_at_utc": "2026-10-12T01:44:31.752208+00:00",
+                  "review_date_text": "",
+                  "visibility": "supplied_snippet",
+                  "extraction_selector": ".comment-root .list > .item > .info",
+                  "source_url": "https://item.jd.com/10088537675758.html",
+                  "text_sha256": "5150fa78808d453a8583cab59df0e1c278ca150ca463da5be09488b82275ecb8",
+                  "text_excerpt": "这鼠标手感真不错，握着舒",
+                  "text_abbreviated_for_archive": true
+                },
+                {
+                  "index": 1,
+                  "issue_topics": [],
+                  "evidence_id": "743d6211430f57e1",
+                  "observed_at_utc": "2026-10-12T01:44:31.752241+00:00",
+                  "review_date_text": "",
+                  "visibility": "supplied_snippet",
+                  "extraction_selector": ".comment-root .list > .item > .info",
+                  "source_url": "https://item.jd.com/10088537675758.html",
+                  "text_sha256": "9db7ff673e6b4c42c8112f4bc9e11e1d8043f2f90c43b11ef9505f19a43d66ea",
+                  "text_excerpt": "罗技这鼠标颜值真挺高，实",
+                  "text_abbreviated_for_archive": true
+                },
+                {
+                  "index": 2,
+                  "issue_topics": [],
+                  "evidence_id": "c8ca219f2b012a14",
+                  "observed_at_utc": "2026-10-12T01:44:31.752248+00:00",
+                  "review_date_text": "",
+                  "visibility": "supplied_snippet",
+                  "extraction_selector": ".comment-root .list > .item > .info",
+                  "source_url": "https://item.jd.com/10088537675758.html",
+                  "text_sha256": "e7050bd2edab2d417f3b7f23d40087d88dc4146f64cb74dfbc8bc7d36aaed732",
+                  "text_excerpt": "外包装很严实，还带了一个",
+                  "text_abbreviated_for_archive": true
+                }
+              ],
+              "quality_score": null,
+              "evidence_level": "limited_unverified_snippets",
+              "caveat": "只分析传入的评论片段，未验证是否真实购买、刷评、样本是否有偏或覆盖全部差评；不输出产品质量分。",
+              "review_evidence_omitted": 0
+            },
+            "review_fetch_status": "observed"
+          },
+          {
+            "index": 6,
+            "title": "罗技M185无线办公鼠标笔记本台式电脑家用便携即插即用持久续航",
+            "platform": "pdd",
+            "merchant": "",
+            "brand": "Logitech/罗技",
+            "model": "M185",
+            "specification": "",
+            "condition": "unknown",
+            "unit": "unknown",
+            "pack_count": null,
+            "product_form": "unknown",
+            "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+            "displayed_price_yuan": "35.29",
+            "observed_at_utc": "2026-10-12T01:43:27.826976+00:00",
+            "source": "browser_observation",
+            "evidence": {
+              "card_selector": "._3glhOBhU",
+              "title_selector": "._3ANzdjkc",
+              "price_selector": "._3_U04GgA",
+              "merchant_selector": null,
+              "link_source": "visible_title_click_navigation",
+              "detail_source_url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+              "detail_observed_at_utc": "2026-10-12T01:43:47.923532+00:00"
+            },
+            "raw_price_text": "券后 ¥ 35 .29",
+            "detail_evidence": {
+              "status": "observed",
+              "platform": "pdd",
+              "data": {
+                "attributes": {
+                  "brand": {
+                    "value": "Logitech/罗技",
+                    "label": "品牌",
+                    "selector": ".iUUH2sOQ",
+                    "text": "品牌 Logitech/罗技"
+                  },
+                  "model": {
+                    "value": "M185",
+                    "label": "型号",
+                    "selector": ".iUUH2sOQ",
+                    "text": "型号 M185"
+                  }
+                },
+                "seller_description": null,
+                "merchant": null,
+                "sku_options": [],
+                "selected_specification": "",
+                "missing_fields": [
+                  "unit",
+                  "condition"
+                ],
+                "notice": "只有明确选中的 SKU 可用于规格对比；可选列表不代表当前价格对应的 SKU。商品标题不作为参数证据。",
+                "observed_at_utc": "2026-10-12T01:43:47.923532+00:00",
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+                "visible_parameter_count": 6,
+                "visible_sku_option_count": 0
+              },
+              "data_source": "live_visible_browser_not_checkout_verified",
+              "notice": "可见文本仅为页面证据，不把任意正文金额当作 SKU 售价。"
+            },
+            "structured_identity": {
+              "brand": "Logitech/罗技",
+              "model": "M185",
+              "specification": "",
+              "condition": "unknown",
+              "unit": "unknown"
+            },
+            "missing_identity_fields": [
+              "specification",
+              "condition"
+            ],
+            "merchant_evidence": {},
+            "estimated_total_yuan": null,
+            "price_explanation": "展示价/运费/优惠缺失或金额无效",
+            "identity_key": null,
+            "same_sku_confirmed": false,
+            "price_sku_verified": false,
+            "seller_evidence": "missing",
+            "quality_evidence": "missing_or_unverified",
+            "recommendation_basis": "displayed_price_only_no_quality_assessment",
+            "rank_within_identity_group": 3,
+            "decision_reasons": [
+              "展示价在预算内；同 SKU、运费与优惠资格仍待核验"
+            ]
+          }
+        ],
+        "recommendation_analysis": {
+          "status": "provisional_shortlist",
+          "total_eligible": 10,
+          "excluded": [
+            {
+              "index": 5,
+              "title": "[性价比之选]罗技M185无线鼠标",
+              "url": "https://item.jd.com/100343903254.html",
+              "reasons": [
+                "展示价超预算"
+              ]
+            },
+            {
+              "index": 9,
+              "title": "罗技M185无线办公鼠标笔记本台式电脑家用便携即插即用整箱批发装",
+              "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969797364631",
+              "reasons": [
+                "展示价超预算"
+              ]
+            }
+          ],
+          "identity_check": {
+            "status": "ok",
+            "candidate_groups": [],
+            "singletons": [],
+            "unmatched": [
+              {
+                "index": 0,
+                "url": "https://item.jd.com/10042275731805.html",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 1,
+                "url": "https://item.jd.com/10088537675758.html",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 2,
+                "url": "https://item.jd.com/423478.html",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 3,
+                "url": "https://item.jd.com/10228326138322.html",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 4,
+                "url": "https://item.jd.com/10105785174393.html",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 5,
+                "url": "https://item.jd.com/100343903254.html",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 6,
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 7,
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=1004623732110",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 8,
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=998604982815",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 9,
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969797364631",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 10,
+                "url": "https://mobile.yangkeduo.com/goods.html?goods_id=885702510983",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              },
+              {
+                "index": 11,
+                "url": "https://www.goofish.com/item?id=919588274330",
+                "reason": "brand/model/specification/condition 缺失，不能认定同款"
+              }
+            ],
+            "errors": [],
+            "warning": "仅比较显式品牌、型号、变体规格与新旧状态完全一致的候选；不保证真正同 SKU，需核对商家详情。"
+          },
+          "ranking_scope": "within_explicit_variant_groups_only; incomplete_identity_not_comparable",
+          "warnings": [
+            "该列表不是最终质量排名，也不能据此认定最值得买：商品评价、真伪、卖家信誉、售后均未独立核实。",
+            "只有明确品牌/型号/规格/新旧完全一致的候选才属于同款候选组；需要人工确认实物 SKU。",
+            "展示价格不等于最终实付价；运费、优惠券、会员、地区价及库存必须在结算页核实。",
+            "不执行购物车、下单和支付操作。"
+          ]
+        },
+        "quality": "limited_visible_review_evidence_not_independently_verified",
+        "next_step": "确认同 SKU，再获取可信的评价和商家证据；实付价格以结算页为准。",
+        "checkout_verified": false,
+        "checked": [
+          "visible_search_links",
+          "displayed_prices",
+          "platform_coverage",
+          "shortlisted_visible_product_parameters"
+        ],
+        "missing": [
+          "authenticated_checkout_price",
+          "verified_purchase_reviews",
+          "certified_merchant_reputation",
+          "same_sku_confirmation_if_identity_fields_missing"
+        ],
+        "detail_identity_check": {
+          "status": "ok",
+          "candidate_groups": [],
+          "singletons": [],
+          "unmatched": [
+            {
+              "index": 0,
+              "url": "https://www.goofish.com/item?id=919588274330",
+              "reason": "brand/model/specification/condition 缺失，不能认定同款"
+            },
+            {
+              "index": 1,
+              "url": "https://item.jd.com/10088537675758.html",
+              "reason": "brand/model/specification/condition 缺失，不能认定同款"
+            },
+            {
+              "index": 2,
+              "url": "https://mobile.yangkeduo.com/goods.html?goods_id=969788162982",
+              "reason": "brand/model/specification/condition 缺失，不能认定同款"
+            }
+          ],
+          "errors": [],
+          "warning": "仅比较显式品牌、型号、变体规格与新旧状态完全一致的候选；不保证真正同 SKU，需核对商家详情。"
+        },
+        "review_sample_size": 3,
+        "risk_entries": [],
+        "response_mode": "compact",
+        "full_evidence": "research_purchase(compact=False), get_product_detail, get_visible_reviews"
+      }
+    },
+    {
+      "tool": "mcp__multimall__get_visible_reviews",
+      "arguments": {
+        "product_url": "https://item.jd.com/423478.html",
+        "limit": 20
+      },
+      "observed_at_utc": "2026-10-12T01:44:45.048012+00:00",
+      "result": {
+        "status": "observed",
+        "platform": "jd",
+        "reviews": [
+          {
+            "source_url": "https://item.jd.com/423478.html",
+            "extraction_selector": ".comment-root .list > .item > .info",
+            "verified_purchase": null,
+            "review_date_text": "",
+            "observed_at_utc": "2026-10-12T01:44:45.037740+00:00",
+            "text_sha256": "2408e1ba1d4c76c33fc89cacd58cdd6e77f1dbd7fa77461f41a79b5974347e94",
+            "text_abbreviated_for_archive": true
+          },
+          {
+            "source_url": "https://item.jd.com/423478.html",
+            "extraction_selector": ".comment-root .list > .item > .info",
+            "verified_purchase": null,
+            "review_date_text": "",
+            "observed_at_utc": "2026-10-12T01:44:45.037777+00:00",
+            "text_sha256": "b607feb984efcd5b8f5dfff742f0bb9473d6a16d6ad23fdd30381e448e7c4557",
+            "text_abbreviated_for_archive": true
+          },
+          {
+            "source_url": "https://item.jd.com/423478.html",
+            "extraction_selector": ".comment-root .list > .item > .info",
+            "verified_purchase": null,
+            "review_date_text": "",
+            "observed_at_utc": "2026-10-12T01:44:45.037783+00:00",
+            "text_sha256": "c59181807f83bd67601e1b4a3d5c0d47df5a5546b55cab72a025127788e0e6c3",
+            "text_abbreviated_for_archive": true
+          }
+        ],
+        "review_count": 3,
+        "page_url": "https://item.jd.com/423478.html",
+        "reason": "",
+        "provenance": "visible_dom_only_not_independently_verified",
+        "caveat": "仅当前渲染的评价正文；未读取分页/折叠评论，无法核实真实购买，缺失不代表没有差评。",
+        "summary": {
+          "status": "evidence_summary",
+          "sample_size": 3,
+          "duplicate_snippets_removed": 0,
+          "risk_entries": [],
+          "rating_samples": 0,
+          "mean_rating_from_supplied_samples": null,
+          "positive_keyword_mentions": 1,
+          "issue_review_mentions": 0,
+          "issue_topics": {},
+          "review_evidence": [
+            {
+              "index": 0,
+              "issue_topics": [],
+              "evidence_id": "6d231e6f025bbabb",
+              "observed_at_utc": "2026-10-12T01:44:45.037740+00:00",
+              "review_date_text": "",
+              "visibility": "supplied_snippet",
+              "extraction_selector": ".comment-root .list > .item > .info",
+              "source_url": "https://item.jd.com/423478.html",
+              "text_sha256": "2408e1ba1d4c76c33fc89cacd58cdd6e77f1dbd7fa77461f41a79b5974347e94",
+              "text_excerpt": "响应速度：个头虽然比较小",
+              "text_abbreviated_for_archive": true
+            },
+            {
+              "index": 1,
+              "issue_topics": [],
+              "evidence_id": "3c11e2db16786466",
+              "observed_at_utc": "2026-10-12T01:44:45.037777+00:00",
+              "review_date_text": "",
+              "visibility": "supplied_snippet",
+              "extraction_selector": ".comment-root .list > .item > .info",
+              "source_url": "https://item.jd.com/423478.html",
+              "text_sha256": "b607feb984efcd5b8f5dfff742f0bb9473d6a16d6ad23fdd30381e448e7c4557",
+              "text_excerpt": "罗技M185这鼠标确实挺",
+              "text_abbreviated_for_archive": true
+            },
+            {
+              "index": 2,
+              "issue_topics": [],
+              "evidence_id": "c2c068c021b3d67a",
+              "observed_at_utc": "2026-10-12T01:44:45.037783+00:00",
+              "review_date_text": "",
+              "visibility": "supplied_snippet",
+              "extraction_selector": ".comment-root .list > .item > .info",
+              "source_url": "https://item.jd.com/423478.html",
+              "text_sha256": "c59181807f83bd67601e1b4a3d5c0d47df5a5546b55cab72a025127788e0e6c3",
+              "text_excerpt": "罗技鼠标手感很好，握持贴",
+              "text_abbreviated_for_archive": true
+            }
+          ],
+          "quality_score": null,
+          "evidence_level": "limited_unverified_snippets",
+          "caveat": "只分析传入的评论片段，未验证是否真实购买、刷评、样本是否有偏或覆盖全部差评；不输出产品质量分。"
+        }
+      }
+    },
+    {
+      "tool": "mcp__multimall__close_browser",
+      "arguments": {},
+      "observed_at_utc": "2026-10-12T01:44:45.706228+00:00",
+      "result": {
+        "status": "released_external_session",
+        "browsers_closed": 0,
+        "external_sessions_released": 3
+      }
+    }
+  ],
+  "archive_note": "购物工具参数与返回；评论及卖家自述仅留短摘录、来源和正文哈希。完整返回保存在本机 output/optimization-2026-10-12。"
+}

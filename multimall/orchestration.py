@@ -1,0 +1,219 @@
+"""Multi-platform fanout with per-platform evidence provenance and honest coverage.
+
+Searchers are injected for deterministic unit tests and can later be replaced
+by authorized API-backed providers without changing MCP tool contracts.
+"""
+from __future__ import annotations
+
+import asyncio
+import re
+from collections.abc import Awaitable, Callable
+from typing import Any
+
+from .core import PLATFORMS, allowlisted_url, platform_from_url
+from .intelligence import recommend_products, validated_offer
+from .evidence import enrich_offer
+
+SearchProvider = Callable[[str, str, int], Awaitable[dict[str, Any]]]
+DEFAULT_PLATFORMS = ("taobao", "jd", "pdd")
+
+
+def normalize_platforms(platforms: list[str] | None) -> list[str]:
+    selected = list(DEFAULT_PLATFORMS) if platforms is None else platforms
+    if not isinstance(selected, list) or not 1 <= len(selected) <= 6:
+        raise ValueError("platforms 需为 1-6 个平台名称")
+    if len(set(selected)) != len(selected):
+        raise ValueError("platforms 不能重复")
+    if any(not isinstance(p, str) or p not in PLATFORMS for p in selected):
+        raise ValueError(f"不支持的平台；可选：{', '.join(PLATFORMS)}")
+    return selected
+
+
+async def search_all_platforms(provider: SearchProvider, query: str,
+                               platforms: list[str] | None = None,
+                               per_platform_limit: int = 8,
+                               concurrency: int = 2) -> dict[str, Any]:
+    selected = normalize_platforms(platforms)
+    if not isinstance(query, str) or not query.strip() or len(query) > 120:
+        raise ValueError("商品关键词不能为空，且不得超过 120 字符")
+    if not 1 <= per_platform_limit <= 20 or not 1 <= concurrency <= 3:
+        raise ValueError("per_platform_limit 取 1-20，concurrency 取 1-3")
+
+    semaphore = asyncio.Semaphore(concurrency)
+
+    async def one(platform: str) -> dict[str, Any]:
+        async with semaphore:
+            try:
+                result = await provider(platform, query, per_platform_limit)
+                if not isinstance(result, dict):
+                    raise ValueError("Provider 结果不是对象")
+                items = result.get("products", [])
+                if not isinstance(items, list):
+                    raise ValueError("Provider products 不是数组")
+                offers = []
+                rejected = 0
+                for item in items[:per_platform_limit]:
+                    try:
+                        checked = validated_offer(item)
+                        if checked["platform"] != platform:
+                            raise ValueError("返回结果跨平台")
+                        offers.append(checked)
+                    except (ValueError, TypeError, KeyError):
+                        rejected += 1
+                status = str(result.get("status") or "unknown")
+                # Never describe a failure or manual step as successful search.
+                if status not in ("observed", "no_extractable_products",
+                                  "manual_search_required", "navigation_error",
+                                  "unexpected_redirect", "error", "blocked_url",
+                                  "invalid_platform", "login_required", "verification_required",
+                                  "loading", "session_not_open"):
+                    status = "unknown"
+                if status != "observed":
+                    offers = []  # avoid accidental leakage of stale/partial data
+                return {
+                    "platform": platform, "status": status,
+                    "products": offers, "rejected_records": rejected,
+                    "reason": str(result.get("reason") or result.get("notice") or "")[:280],
+                    "search_entry": str(result.get("opened_url") or "")[:400],
+                }
+            except Exception as exc:
+                return {"platform": platform, "status": "error", "products": [],
+                        "rejected_records": 0, "reason": str(exc)[:280]}
+
+    results = await asyncio.gather(*(one(p) for p in selected))
+    products = [item for res in results for item in res["products"]]
+    success = [r["platform"] for r in results if r["status"] == "observed" and r["products"]]
+    restricted = [r["platform"] for r in results if r["status"] != "observed" or not r["products"]]
+    return {
+        "status": "observed_all" if not restricted else ("partial" if success else "no_verified_search_results"),
+        "query": query.strip(),
+        "requested_platforms": selected, "observed_platforms": success,
+        "limited_platforms": restricted, "per_platform": results,
+        "products": products, "products_count": len(products),
+        "source_notice": "仅汇总即时可见商品记录；受限平台不推断有无商品或价格。价格未经结算验证。",
+    }
+
+
+async def research_purchase(provider: SearchProvider, query: str,
+                            platforms: list[str] | None = None,
+                            budget_yuan: float | None = None,
+                            include_secondhand: bool = False, location: str = "",
+                            per_platform_limit: int = 8,
+                            detail_provider: Callable[[str], Awaitable[dict[str, Any]]] | None = None,
+                            inspect_details_per_platform: int = 0,
+                            inspect_shortlist_top_k: int = 0) -> dict[str, Any]:
+    if not 0 <= inspect_details_per_platform <= 2:
+        raise ValueError("inspect_details_per_platform 必须是 0-2")
+    if not 0 <= inspect_shortlist_top_k <= 3:
+        raise ValueError("inspect_shortlist_top_k 必须是 0-3")
+    discovery = await search_all_platforms(provider, query, platforms, per_platform_limit)
+    candidates = discovery["products"]
+    intent_excluded = []
+    if ("开发板" in query or ("esp32" in query.casefold() and "amoled" in query.casefold())) and not re.search(r"外壳|保护壳|裸屏|表情包|软件资源", query):
+        eligible = []
+        for row in candidates:
+            title = row["title"]
+            mismatch = (re.search(r"软件资源|资源分享|表情包|OTA替换|仅外壳|保护壳|裸屏|不含[主开]|外壳", title) and not re.search(r"含开发板|附开发板|开发板套装|开发板(?:[+＋]|带|含)外壳", title))
+            if mismatch:
+                intent_excluded.append({"url":row["url"], "title":title, "reason":"标题明确指向配件/数字资源；不作为整块开发板推荐", "evidence_source":"visible_search_title_not_product_parameters"})
+            else:
+                eligible.append(row)
+        candidates = eligible
+    if "鼠标" in query and not re.search(r"接收器|电池盖|脚贴|鼠标垫|外壳|微动开关|拆机配件", query):
+        eligible = []
+        for row in candidates:
+            title = row["title"]
+            if (re.search(r"接收器", title) and not re.search(r"[含附带].{0,12}接收器|无接收器|鼠标[+＋]接收器", title)) or re.search(r"鼠标垫|脚贴|微动开关|仅外壳|鼠标电池盖|鼠标外壳|拆机配件", title):
+                intent_excluded.append({"url":row["url"], "title":title, "reason":"标题指向鼠标配件；不作为整鼠推荐", "evidence_source":"visible_search_title_not_product_parameters"})
+            else:
+                eligible.append(row)
+        candidates = eligible
+    requested_models = set(re.findall(r"(?<![a-z0-9])m\d{3,4}[a-z]?(?![a-z0-9])", query.casefold()))
+    if requested_models:
+        eligible = []
+        for row in candidates:
+            listed_models = set(re.findall(r"(?<![a-z0-9])m\d{3,4}[a-z]?(?![a-z0-9])", row["title"].casefold()))
+            if listed_models and not requested_models.intersection(listed_models):
+                intent_excluded.append({"url":row["url"], "title":row["title"], "reason":"标题显式型号与指定型号不一致", "evidence_source":"visible_search_title_not_product_parameters"})
+            else:
+                eligible.append(row)
+        candidates = eligible
+    if not candidates:
+        return {
+            "status": "needs_more_evidence",
+            "discovery": discovery,
+            "shortlist": [], "intent_excluded": intent_excluded,
+            "reason": "没有任何平台返回可核实的商品记录；不能给出推荐。",
+            "next_step": "检查真实登录/权限/页面变化，或由用户提供具体商品链接。",
+        }
+    detail_coverage = []
+
+    async def inspect(index):
+        row = candidates[index]
+        try:
+            detail = await detail_provider(row['url'])
+            if not isinstance(detail, dict):
+                raise ValueError('详情返回不是对象')
+        except Exception:
+            detail = {'status':'error', 'data':None, 'reason':'详情读取失败，未补造参数'}
+        candidates[index] = enrich_offer(row, detail)
+        detail_coverage.append({'platform':row['platform'],'url':row['url'],'status':detail.get('status'),
+                                'structured_fields':list((detail.get('data') or {}).get('attributes', {})),
+                                'merge_status':candidates[index]['detail_merge_status'],
+                                'structured_identity':candidates[index].get('structured_identity', {})})
+
+    def filter_detail_conflicts(rows):
+        eligible = []
+        for row in rows:
+            observed_models = set(re.findall(r"(?<![a-z0-9])m\d{3,4}[a-z]?(?![a-z0-9])", str(row.get('model') or '').casefold()))
+            brand = str(row.get('brand') or '').casefold()
+            reason = None
+            if requested_models and observed_models and not requested_models.intersection(observed_models):
+                reason = '详情显式型号与指定型号不一致'
+            elif row.get('detail_merge_status') == 'visible_structured_claims_only' and ('罗技' in query or 'logitech' in query.casefold()) and brand and not ('罗技' in brand or 'logitech' in brand):
+                reason = '详情展示品牌与指定罗技品牌不一致（不据此判定假货）'
+            if reason:
+                intent_excluded.append({'url':row['url'], 'title':row['title'], 'reason':reason,
+                                        'evidence_source':'visible_product_parameter','detail_evidence':row.get('detail_evidence')})
+            else:
+                eligible.append(row)
+        return eligible
+
+    if detail_provider and inspect_details_per_platform:
+        inspected = {}
+        for i, row in enumerate(candidates):
+            platform = row['platform']
+            if inspected.get(platform, 0) >= inspect_details_per_platform:
+                continue
+            if not recommend_products([row], budget_yuan, include_secondhand, location)['recommendations']:
+                continue
+            inspected[platform] = inspected.get(platform, 0) + 1
+            await inspect(i)
+    candidates = filter_detail_conflicts(candidates)
+    if detail_provider and inspect_shortlist_top_k:
+        # Re-rank after each observed conflict. The extra detail budget remains bounded.
+        for _ in range(inspect_shortlist_top_k):
+            if not candidates:
+                break
+            shortlist = recommend_products(candidates, budget_yuan, include_secondhand, location)['recommendations']
+            pending = next((offer for offer in shortlist if not offer.get('detail_evidence')), None)
+            if not pending:
+                break
+            index = next(i for i, row in enumerate(candidates) if row['url']==pending['url'])
+            await inspect(index)
+            candidates = filter_detail_conflicts(candidates)
+    if not candidates:
+        return {'status':'needs_more_evidence', 'discovery':discovery, 'shortlist':[],
+                'intent_excluded':intent_excluded, 'detail_coverage':detail_coverage,
+                'reason':'详情参数显示候选不符合指定身份，不能推荐。'}
+    ranked = recommend_products(candidates, budget_yuan, include_secondhand, location)
+    return {
+        "status": "provisional_results",
+        "intent_excluded": intent_excluded,
+        "detail_coverage": detail_coverage,
+        "discovery": {k: v for k, v in discovery.items() if k != "products"},
+        "shortlist": ranked["recommendations"],
+        "recommendation_analysis": {k: v for k, v in ranked.items() if k != "recommendations"},
+        "quality": "not_assessed_no_verified_reviews",
+        "next_step": "确认同 SKU，再获取可信的评价和商家证据；实付价格以结算页为准。",
+    }

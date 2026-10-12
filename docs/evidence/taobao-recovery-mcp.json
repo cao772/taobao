@@ -1,0 +1,61 @@
+{
+  "observed_at_utc": "2026-10-11T04:55:51.992103+00:00",
+  "kind": "MCP_retry_after_human_reported_recovery",
+  "calls": [
+    {
+      "tool": "get_product_detail",
+      "arguments": {
+        "url": "https://item.taobao.com/item.htm?id=1032106323206"
+      },
+      "result": {
+        "status": "verification_required",
+        "reason": "平台要求人工验证；请在浏览器处理后重试，不自动处理验证码。",
+        "data": null
+      },
+      "is_error": false
+    },
+    {
+      "tool": "get_visible_reviews",
+      "arguments": {
+        "product_url": "https://item.taobao.com/item.htm?id=1032106323206",
+        "limit": 20
+      },
+      "result": {
+        "status": "verification_required",
+        "platform": "taobao",
+        "reviews": [],
+        "review_count": 0,
+        "page_url": "https://item.taobao.com/item.htm?id=1032106323206",
+        "reason": "平台要求人工验证；请在浏览器处理后重试，不自动处理验证码。",
+        "provenance": "visible_dom_only_not_independently_verified",
+        "caveat": "仅当前渲染的评价正文；未读取分页/折叠评论，无法核实真实购买，缺失不代表没有差评。",
+        "summary": {
+          "status": "no_review_evidence",
+          "sample_size": 0,
+          "duplicate_snippets_removed": 0,
+          "risk_entries": [],
+          "rating_samples": 0,
+          "mean_rating_from_supplied_samples": null,
+          "positive_keyword_mentions": 0,
+          "issue_review_mentions": 0,
+          "issue_topics": {},
+          "review_evidence": [],
+          "quality_score": null,
+          "evidence_level": "limited_unverified_snippets",
+          "caveat": "只分析传入的评论片段，未验证是否真实购买、刷评、样本是否有偏或覆盖全部差评；不输出产品质量分。"
+        }
+      },
+      "is_error": false
+    },
+    {
+      "tool": "close_browser",
+      "arguments": {},
+      "result": {
+        "status": "released_external_session",
+        "browsers_closed": 0,
+        "external_sessions_released": 1
+      },
+      "is_error": false
+    }
+  ]
+}

@@ -13,6 +13,8 @@ jobs:
           python-version: '3.12'
       - name: Install test dependencies
         run: python -m pip install -e '.[dev]'
+      - name: Install browser for rendered adapter fixtures
+        run: python -m playwright install --with-deps chromium
       - name: Run tests
         run: python -m pytest -q
       - name: Verify import

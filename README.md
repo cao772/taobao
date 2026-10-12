@@ -1,24 +1,11 @@
-# MultiMall MCP｜跨平台 AI 购物工具
+# MultiMall MCP｜跨平台智能选品
 
-**项目定位**：通过标准 MCP 工具，让 Codex、Hermes Agent 等智能体调用淘宝/天猫、京东、拼多多、得物、闲鱼、美团的商品搜索、详情查看、比价与购物审核能力。
+Codex / Hermes → MCP stdio → 平台可见网页 → 搜索、同款候选、价格比较、评价证据与人工购物审核。
 
-> 2026-10-10 状态：v0.1 可运行的技术骨架已在本次对话生成，六平台真实 API 并未接入，浏览器抓取的可用性未做全平台验证，不支持加购、提交订单和付款。计划功能不等于已完成。禁止编造价格。
+**2026-10-11 状态**：开发分支已经接入淘宝/天猫、京东、拼多多、闲鱼的用户授权网页商品数据。真实登录会话的验收记录见 [实站验收](docs/live-acceptance-2026-10-11.md)。得物、美团保留人工检索入口。官方联盟 API 未配置；评论覆盖、最终结算价和客户端产品级联调不能视为已全部完成。代码继续保留在 Draft PR #2，未合并 main。
 
-## 技术路线
-Codex / Hermes → MultiMall MCP (Python, stdio) → Search/Detail/Compare/Review → Provider Adapters → 合规官方 API + 授权可见浏览器。
+## 使用
 
-## 已实现的 v0.1 工具
-- `list_platforms`：平台能力、未连接状态。
-- `search_products`：只读浏览器候选搜索；若失败，明确返回需要人工搜索。
-- `get_product_detail`：白名单站点页面观察。
-- `compare_products`：对已观察价格排序/过滤，不推测真实结算价。
-- `prepare_purchase_review`：产生人工购物审核单。
-- `close_browser`：关闭专用浏览器。
-
-## 安全原则
-只读优先；不处理验证码、Cookie 导出、账号密码或绕风控操作；浏览器数据作为不可信输入；所有订单提交和支付必须单独合规许可与用户审批。
-
-## 安装、测试和运行（v0.1 已提交）
 ```sh
 python3 -m venv .venv
 .venv/bin/pip install -e '.[dev]'
@@ -26,20 +13,52 @@ python3 -m venv .venv
 .venv/bin/python -m pytest -q
 .venv/bin/python -m multimall.server
 ```
-Codex 与 Hermes 注册配置见 `examples/codex-config.toml`、`examples/hermes-config.yaml`。首次运行需要安装浏览器；两客户端使用独立持久化浏览器配置目录。
 
-## Roadmap
-1. 已提交 v0.1 源码与 CI 定义；下一步核验 CI 和 Codex/Hermes 的实际 MCP handshake。
-2. 三个联盟 API 适配器：淘宝、京东、拼多多。
-3. 得物/闲鱼二手与潮品分析、美团城市/门店/套餐。
-4. 同款识别、券后价验证、历史价、风险提示。
-5. 人工确认的加购与结算审批；默认禁止自动付款。
+注册 MCP 的配置见 `examples/codex-config.toml` 和 `examples/hermes-config.yaml`；替换为本机绝对路径。每客户端使用独立 Profile 根目录。默认打开可见的专用浏览器，用户自行扫码登录，不传密码或 Cookie。
 
-**三端事实源**：
-- GitHub 代码与研发任务：[taobao](https://github.com/cao772/taobao) / [Issue #1](https://github.com/cao772/taobao/issues/1)
-- Google Drive：[项目文件夹](https://drive.google.com/drive/folders/1ultO67LwVKCvqV60Ss765Pq2YVMgaD9v) / [技术方案](https://docs.google.com/document/d/15PwWMW4HzU8YqvYxVM0EE3kd9uF2sPd2_GJqi4iX37U/edit)
-- Notion：[项目状态与架构](https://app.notion.com/p/3f57bbed13528141853cd47e2f1b2238?pvs=204)
+1. 调用 `open_platform_session(platform="taobao", keyword="ESP32-S3 AMOLED")` 打开平台，用户自行登录。
+2. 调用 `inspect_platform_session(platform="taobao")` 读取当前页，不刷新登录窗口。京东、拼多多、闲鱼同理。
+3. 调用 `research_purchase` 完成多平台搜索与待复核候选列表。
 
-注：Google Drive 当前仅已归档技术方案，ZIP 包仍需单独上传验收。
+```json
+{
+  "keyword": "ESP32-S3 AMOLED开发板",
+  "budget_yuan": 200,
+  "platforms_json": "[\"taobao\",\"jd\",\"pdd\",\"xianyu\"]",
+  "include_secondhand": true,
+  "per_platform_limit": 5,
+  "inspect_reviews_top_k": 2,
+  "inspect_details_top_k": 3,
+  "inspect_details_per_platform": 1,
+  "compact": true
+}
+```
 
-工程是独立商品购物 MCP，不属于广州局九项目。
+Issue #3 的参数、SKU、评论证据及客户端迭代说明见 [本轮实现](docs/issue-3-implementation.md)。一次研究先检查每个平台 1 条符合目标和预算的候选，再分组排序；默认继续检查前三个短名单详情、前两个评价区，同次详情复用缓存；显式配件/数字资源标题会从开发板推荐中剔除。
+
+完整会话说明、可选的现有 Playwright CLI 会话复用、真实 MCP 复验脚本见 [接入说明](docs/live-integration.md)。不设置 CLI 会话变量时直接用 Python Playwright。
+
+2026-10-12 的拼多多参数、京东评价、闲鱼主商品隔离及报告大小优化见 [三平台优化](docs/optimization-2026-10-12.md)。默认返回精简报告；`compact=false` 保留完整研究证据。
+
+## 14 个工具
+
+- 平台与会话：`list_platforms`、`open_platform_session`、`inspect_platform_session`、`close_browser`。
+- 实际网页读取：`search_products`、`search_all_platforms`、`get_product_detail`、`get_visible_reviews`。
+- 选品分析：`match_same_products`、`analyze_product_reviews`、`compare_products`、`recommend_best_products`、`research_purchase`。
+- 人工审核：`prepare_purchase_review`。
+
+相对上一轮的 12 个工具，新增专用会话打开和当前页面读取两个工具。搜索结果包含真实商品地址、展示价、原始价格文字、时间及字段选择器。页面登录、人工验证、加载和提取受限分别报告，不把空结果当成无货。
+
+## 数据与安全边界
+
+仅按明确品牌、型号、规格、新旧状态分组同款候选；缺失字段保持未知。闲鱼需要显式允许二手候选，商家宣传不等于已核实信誉。缺失评论不补造质量分。展示价可能依赖优惠资格、地区或 SKU，范围/多金额价格保持 null；最终付款价仍需用户核实。
+
+只读取授权可见网页，不导出 Cookie、读取私有页面状态、绕验证码或伪装浏览器指纹。不加购、不提交订单、不付款。凭据、Profile、浏览器原始日志及本地输出不提交进仓库。
+
+## 项目入口
+
+- [代码与 Draft PR #2](https://github.com/cao772/taobao/pull/2)
+- [技术方案](https://docs.google.com/document/d/15PwWMW4HzU8YqvYxVM0EE3kd9uF2sPd2_GJqi4iX37U/edit)
+- [Notion 记录](https://app.notion.com/p/3f57bbed13528141853cd47e2f1b2238)
+
+本轮更新范围为代码与仓库内验收记录，外部文档并未自动同步。

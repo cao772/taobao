@@ -1,5 +1,7 @@
 # ~/.codex/config.toml — replace placeholders with absolute paths.
 [mcp_servers.multimall]
+startup_timeout_sec = 30
+tool_timeout_sec = 900
 command = "/ABS/PATH/multimall-mcp/.venv/bin/python"
 args = ["-m", "multimall.server"]
 [mcp_servers.multimall.env]
