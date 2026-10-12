@@ -196,7 +196,16 @@ class ReadOnlyBrowser:
             found = await self._observe(platform, mode='detail', wait=False)
             if found['state'] != 'ready':
                 return {'status': found['state'], 'reason': _MESSAGES.get(found['state'], ''), 'data': None}
-            data = await self._page.evaluate(DETAIL_JS, {'platform': platform})
+            deadline = asyncio.get_running_loop().time() + 10
+            while True:
+                data = await self._page.evaluate(DETAIL_JS, {'platform': platform})
+                hydrated = bool(data.get('parameters') or data.get('sku_options') or data.get('seller_description'))
+                if hydrated or platform == 'jd' or asyncio.get_running_loop().time() >= deadline:
+                    break
+                await asyncio.sleep(0.5)
+                gate = await self._observe(platform, mode='detail', wait=False)
+                if gate['state'] != 'ready':
+                    return {'status':gate['state'], 'data':None}
             if platform == 'jd' and not data['attributes']:
                 # Read-only product specifications control; never click SKU/cart/buy controls.
                 try:

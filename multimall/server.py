@@ -5,6 +5,7 @@ import json
 from typing import Any
 
 from .browser import PlatformBrowserPool
+from .evidence import enrich_offer
 from .core import PLATFORMS, allowlisted_url, compare_offers, platform_from_url
 
 from .intelligence import (analyze_reviews as _analyze_reviews,
@@ -172,10 +173,12 @@ async def research_purchase(keyword: str, budget_yuan: float | None = None,
                             platforms_json: str = '["taobao","jd","pdd"]',
                             include_secondhand: bool = False,
                             location: str = "", per_platform_limit: int = 8,
-                            inspect_reviews_top_k: int = 2, inspect_details_top_k: int = 3) -> dict[str, Any]:
+                            inspect_reviews_top_k: int = 2, inspect_details_top_k: int = 3,
+                            inspect_details_per_platform: int = 1) -> dict[str, Any]:
     """One-call shopping research: search -> provenance -> provisional shortlist.
 
-    By default inspect up to three shortlisted detail pages and two review sections.
+    Inspect one eligible detail per platform BEFORE ranking, then up to three shortlisted
+    details and two review sections. Cached details are reused within this request.
     Optionally (inspect_reviews_top_k=0..3) inspect visible review-like DOM text
     for shortlisted product pages; absent reviews must never become a quality score.
     """
@@ -186,23 +189,23 @@ async def research_purchase(keyword: str, budget_yuan: float | None = None,
             raise ValueError("inspect_details_top_k 必须是 0-3")
         platforms = json.loads(platforms_json)
         result = await _research_purchase(browser.search, keyword, platforms, budget_yuan,
-                                          include_secondhand, location, per_platform_limit)
+                                          include_secondhand, location, per_platform_limit,
+                                          detail_provider=get_product_detail,
+                                          inspect_details_per_platform=inspect_details_per_platform)
         result["checkout_verified"] = False
         result["checked"] = ["visible_search_links", "displayed_prices", "platform_coverage"]
         result["missing"] = ["authenticated_checkout_price", "verified_purchase_reviews", "certified_merchant_reputation"]
         if result["status"] == "provisional_results":
             enriched = []
             for item in result["shortlist"][:inspect_details_top_k]:
-                detail = await get_product_detail(item["url"])
-                item["detail_evidence"] = detail
-                fields = detail.get("data") or {}
-                attributes = fields.get("attributes", {})
-                item["structured_identity"] = {key: attributes.get(key, {}).get("value", "") for key in ("brand", "model", "unit")}
-                item["structured_identity"]["specification"] = fields.get("selected_specification", "")
-                item["structured_identity"]["condition"] = "unknown"
-                item["missing_identity_fields"] = [key for key in ("brand", "model", "specification", "condition") if item["structured_identity"].get(key) in ("", "unknown")]
-                enriched.append({**item, **item["structured_identity"]})
-                item["decision_reasons"] = ["展示价在预算内；同 SKU、运费与优惠资格仍待核验"]
+                detail = item.get("detail_evidence") or await get_product_detail(item["url"])
+                merged = enrich_offer(item, detail)
+                item.update(merged)
+                if not item.get("structured_identity"):
+                    item["structured_identity"] = {key:item.get(key, "") for key in ("brand","model","specification","condition","unit")}
+                    item["missing_identity_fields"] = [key for key in ("brand","model","specification","condition") if item.get(key) in (None,"","unknown")]
+                enriched.append(item)
+                item["decision_reasons"] = ["展示价在预算内；同 SKU、运费与优惠资格仍待核验" if budget_yuan is not None else "按展示价生成候选；同 SKU、运费与优惠资格仍待核验"]
             result["checked"].append("shortlisted_visible_product_parameters")
             result["detail_identity_check"] = _match_same_products(enriched) if enriched else {"status":"not_checked"}
             result["missing"].append("same_sku_confirmation_if_identity_fields_missing")

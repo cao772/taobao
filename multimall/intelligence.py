@@ -21,7 +21,7 @@ _NEGATIVE_TOPICS = {
     "spec_mismatch": ("货不对板", "参数不符", "少配件", "型号不对", "与描述不符"),
 }
 _POSITIVE = ("好用", "不错", "满意", "稳定", "做工好", "符合描述", "质量好")
-_NEGATE = ("没有", "并未", "不是", "未发现", "无", "不")
+_NEGATE = ("没", "没有", "并未", "不是", "未发现", "无", "不")
 
 
 def _identity(value: Any) -> str:
@@ -52,6 +52,9 @@ def validated_offer(row: dict[str, Any]) -> dict[str, Any]:
         "unit": str(row.get("unit") or "unknown")[:80],
         "pack_count": row.get("pack_count"),
         "detail_evidence": row.get("detail_evidence", {}),
+        "structured_identity": row.get("structured_identity", {}),
+        "missing_identity_fields": row.get("missing_identity_fields", []),
+        "merchant_evidence": row.get("merchant_evidence", {}),
         "merchant": str(row.get("merchant") or "")[:120],
         "displayed_price_yuan": str(price) if price else None,
         "price_status": str(row.get("price_status") or "unverified_display")[:60],
@@ -242,16 +245,22 @@ def recommend_products(products: list[dict[str, Any]], budget_yuan: float | None
             "title": row["title"],
             "platform": row["platform"],
             "merchant": row["merchant"],
+            **{key:row.get(key) for key in ("brand","model","specification","condition","unit","pack_count","product_form")},
             "url": row["url"],
             "displayed_price_yuan": row["displayed_price_yuan"],
             "observed_at_utc": row["observed_at_utc"],
             "source": row["source"],
             "evidence": row["evidence"],
             "raw_price_text": row["raw_price_text"],
+            "detail_evidence": row["detail_evidence"],
+            "structured_identity": row["structured_identity"],
+            "missing_identity_fields": row["missing_identity_fields"],
+            "merchant_evidence": row["merchant_evidence"],
             "estimated_total_yuan": computed["estimated_total_yuan"],
             "price_explanation": computed["reason"],
             "identity_key": group,
             "same_sku_confirmed": False,
+            "price_sku_verified": False,
             "seller_evidence": "unverified" if row["seller_rating"] is not None else "missing",
             "quality_evidence": "missing_or_unverified",
             "recommendation_basis": "displayed_price_only_no_quality_assessment",

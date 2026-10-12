@@ -23,7 +23,7 @@ class ProductPage:
     async def evaluate(self, expression, arg):
         if arg.get('mode'):
             return {'state':'ready', 'reviews':[{'text':'屏幕坏了，无法使用', 'selector':'.review-content'}]}
-        return {'attributes':{}, 'parameters':[], 'sku_options':[], 'selected_specification':''}
+        return {'attributes':{}, 'parameters':[{'text':'示例参数'}], 'sku_options':[], 'selected_specification':''}
 
 
 def test_details_then_reviews_do_not_reload_verified_current_product():
@@ -52,4 +52,22 @@ def test_different_product_still_navigates_and_restricted_page_still_stops():
         assert page.visits == [target]
         assert (await reader.visible_reviews(target))['status'] == 'verification_required'
         assert page.visits == [target]
+    asyncio.run(run())
+
+
+def test_delayed_product_dom_is_read_without_another_navigation():
+    async def run():
+        class DelayedPage(ProductPage):
+            reads=0
+            async def evaluate(self, expression, arg):
+                if arg.get('mode'):
+                    return {'state':'ready','reviews':[]}
+                self.reads+=1
+                return {'attributes':{},'parameters':[] if self.reads==1 else [{'text':'型号 M185'}],'sku_options':[]}
+        reader=ReadOnlyBrowser(platform='pdd')
+        page=DelayedPage('https://mobile.yangkeduo.com/goods.html?goods_id=123');reader._page=page
+        result=await reader.details(page.url)
+        assert result['data']['parameters']==[{'text':'型号 M185'}]
+        assert page.reads==2
+        assert page.visits==[]
     asyncio.run(run())

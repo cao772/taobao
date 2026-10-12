@@ -14,7 +14,7 @@
   const configs = {
     jd: {cards: ['.plugin_goodsCardWrapper[data-sku]', '#J_goodsList .gl-item', '.gl-warp .gl-item'],
       title: ['[class*="_goods_title_container_"]', '.p-name em', '.p-name'], price: ['span[class*="_price_"]', '.p-price'], merchant: ['span[class*="_name_"]', '.p-shop'],
-      links: ['.p-name a[href]', '.p-img a[href]'], reviews: ['.comment-item .comment-con', '.comment-item .comment-content']},
+      links: ['.p-name a[href]', '.p-img a[href]'], reviews: ['.comment-root .list > .item > .info', '.comment-item .comment-con', '.comment-item .comment-content']},
     taobao: {cards: ['a[class*="Card--doubleCard"]', '[class*="doubleCardWrapper"]', '.m-itemlist .item'],
       title: ['[class*="Title--title"]', '[class*="title--"]', '.title'],
       price: ['[class*="innerPriceWrapper"]', '[class*="Price--price"]', '[class*="price--"]', '.price'],

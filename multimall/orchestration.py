@@ -12,6 +12,7 @@ from typing import Any
 
 from .core import PLATFORMS, allowlisted_url, platform_from_url
 from .intelligence import recommend_products, validated_offer
+from .evidence import enrich_offer
 
 SearchProvider = Callable[[str, str, int], Awaitable[dict[str, Any]]]
 DEFAULT_PLATFORMS = ("taobao", "jd", "pdd")
@@ -97,7 +98,11 @@ async def research_purchase(provider: SearchProvider, query: str,
                             platforms: list[str] | None = None,
                             budget_yuan: float | None = None,
                             include_secondhand: bool = False, location: str = "",
-                            per_platform_limit: int = 8) -> dict[str, Any]:
+                            per_platform_limit: int = 8,
+                            detail_provider: Callable[[str], Awaitable[dict[str, Any]]] | None = None,
+                            inspect_details_per_platform: int = 0) -> dict[str, Any]:
+    if not 0 <= inspect_details_per_platform <= 2:
+        raise ValueError("inspect_details_per_platform 必须是 0-2")
     discovery = await search_all_platforms(provider, query, platforms, per_platform_limit)
     candidates = discovery["products"]
     intent_excluded = []
@@ -138,10 +143,45 @@ async def research_purchase(provider: SearchProvider, query: str,
             "reason": "没有任何平台返回可核实的商品记录；不能给出推荐。",
             "next_step": "检查真实登录/权限/页面变化，或由用户提供具体商品链接。",
         }
+    detail_coverage = []
+    if detail_provider and inspect_details_per_platform:
+        inspected = {}
+        for i, row in enumerate(candidates):
+            platform = row['platform']
+            if inspected.get(platform, 0) >= inspect_details_per_platform:
+                continue
+            if not recommend_products([row], budget_yuan, include_secondhand, location)['recommendations']:
+                continue
+            inspected[platform] = inspected.get(platform, 0) + 1
+            try:
+                detail = await detail_provider(row['url'])
+                if not isinstance(detail, dict):
+                    raise ValueError('详情返回不是对象')
+            except Exception:
+                detail = {'status':'error', 'data':None, 'reason':'详情读取失败，未补造参数'}
+            candidates[i] = enrich_offer(row, detail)
+            detail_coverage.append({'platform':platform,'url':row['url'],'status':detail.get('status'),
+                                    'structured_fields':list((detail.get('data') or {}).get('attributes', {})),
+                                    'merge_status':candidates[i]['detail_merge_status']})
+    if requested_models:
+        eligible = []
+        for row in candidates:
+            observed_models = set(re.findall(r"(?<![a-z0-9])m\d{3,4}[a-z]?(?![a-z0-9])", str(row.get('model') or '').casefold()))
+            if observed_models and not requested_models.intersection(observed_models):
+                intent_excluded.append({'url':row['url'], 'title':row['title'], 'reason':'详情显式型号与指定型号不一致',
+                                        'evidence_source':'visible_product_parameter', 'detail_evidence':row.get('detail_evidence')})
+            else:
+                eligible.append(row)
+        candidates = eligible
+    if not candidates:
+        return {'status':'needs_more_evidence', 'discovery':discovery, 'shortlist':[],
+                'intent_excluded':intent_excluded, 'detail_coverage':detail_coverage,
+                'reason':'详情参数显示候选不符合指定型号，不能推荐。'}
     ranked = recommend_products(candidates, budget_yuan, include_secondhand, location)
     return {
         "status": "provisional_results",
         "intent_excluded": intent_excluded,
+        "detail_coverage": detail_coverage,
         "discovery": {k: v for k, v in discovery.items() if k != "products"},
         "shortlist": ranked["recommendations"],
         "recommendation_analysis": {k: v for k, v in ranked.items() if k != "recommendations"},

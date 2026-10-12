@@ -178,3 +178,28 @@ def test_generic_model_does_not_override_explicit_registered_model():
     assert result['attributes']['model']['label']=='国补备案型号'
     assert result['attributes']['category_claim']['value']=='鼠标'
     assert result['selected_specification']==''
+
+
+def test_jd_review_bodies_exclude_tags_usernames_and_negated_damage():
+    from multimall.intelligence import analyze_reviews
+    html='<div class="comment-root"><div class="list"><div class="item"><span>握持舒适 3685</span></div><div class="item"><span class="nickname">用户</span><div class="info">包装厚实没破损，质量好，满意</div></div></div></div>'
+    result=asyncio.run(observe(html,mode='reviews'))
+    assert len(result['reviews'])==1
+    assert result['reviews'][0]['text']=='包装厚实没破损，质量好，满意'
+    assert analyze_reviews(result['reviews'])['issue_review_mentions']==0
+
+
+def test_pdd_adjacent_labels_and_xianyu_recommendations_are_not_main_identity():
+    from multimall.adapters import DETAIL_JS
+    async def run(platform,html):
+        async with async_playwright() as pw:
+            browser=await pw.chromium.launch(headless=True)
+            page=await browser.new_page();await page.set_content(html)
+            result=await page.evaluate(DETAIL_JS,{'platform':platform})
+            await browser.close();return result
+    pdd=asyncio.run(run('pdd','<div class="iUUH2sOQ"><span class="rMnkPxwx" aria-hidden="true">品牌</span><span class="KjtdjVU2">Logitech/罗技</span></div><div class="iUUH2sOQ"><span>型号</span><span>M185</span></div>'))
+    assert pdd['attributes']['model']['value']=='M185'
+    assert pdd['attributes']['brand']['value']=='Logitech/罗技'
+    xianyu=asyncio.run(run('xianyu','<div class="desc--real">颜色：灰色、红色；卖家声称全新</div><div class="feeds-content--other"><span class="cpv--other">全新</span><div class="desc--other">品牌：另一个品牌</div></div>'))
+    assert not xianyu['attributes']
+    assert xianyu['seller_description']['text']=='颜色：灰色、红色；卖家声称全新'
