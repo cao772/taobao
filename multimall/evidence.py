@@ -83,3 +83,15 @@ def compact_research_report(report: dict[str, Any]) -> dict[str, Any]:
     result['response_mode'] = 'compact'
     result['full_evidence'] = 'research_purchase(compact=False), get_product_detail, get_visible_reviews'
     return result
+
+
+def compact_search_report(report: dict[str, Any]) -> dict[str, Any]:
+    """Keep the complete product list once, plus platform coverage and counts."""
+    from copy import deepcopy
+    result = deepcopy(report)
+    for platform in result.get('per_platform', []):
+        products = platform.pop('products', [])
+        platform['product_count'] = len(products)
+        platform['priced_product_count'] = sum(p.get('displayed_price_yuan') is not None for p in products)
+    result['response_mode'] = 'compact'
+    return result

@@ -76,3 +76,15 @@ def test_compact_report_removes_duplicates_preserving_source_and_review_counts()
     assert summary['quality_score'] is None
     assert len(report['discovery']['per_platform'][0]['products'])==20
     assert len(json.dumps(result))<len(json.dumps(report))
+
+
+def test_compact_search_keeps_products_once_and_preserves_unknown_price():
+    from multimall.evidence import compact_search_report
+    unknown=row();unknown['displayed_price_yuan']=None
+    report={'products':[unknown], 'products_count':1,'per_platform':[{'platform':'jd','status':'observed','products':[unknown]}]}
+    result=compact_search_report(report)
+    assert result['products'][0]['displayed_price_yuan'] is None
+    assert result['per_platform'][0]['product_count']==1
+    assert result['per_platform'][0]['priced_product_count']==0
+    assert 'products' not in result['per_platform'][0]
+    assert len(report['per_platform'][0]['products'])==1

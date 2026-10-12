@@ -5,7 +5,7 @@ import json
 from typing import Any
 
 from .browser import PlatformBrowserPool
-from .evidence import enrich_offer, compact_research_report
+from .evidence import enrich_offer, compact_research_report, compact_search_report
 from .core import PLATFORMS, allowlisted_url, compare_offers, platform_from_url
 
 from .intelligence import (analyze_reviews as _analyze_reviews,
@@ -111,7 +111,7 @@ async def close_browser() -> dict[str, Any]:
 @mcp.tool(annotations=ToolAnnotations(readOnlyHint=True, destructiveHint=False, openWorldHint=True))
 async def search_all_platforms(keyword: str,
                                platforms_json: str = '["taobao","jd","pdd"]',
-                               per_platform_limit: int = 8) -> dict[str, Any]:
+                               per_platform_limit: int = 8, compact: bool = True) -> dict[str, Any]:
     """Search multiple platforms in parallel in visible browsers; no guaranteed coverage.
 
     platforms_json: JSON list of 1-6 platform keys (taobao/jd/pdd/dewu/xianyu/meituan).
@@ -120,7 +120,8 @@ async def search_all_platforms(keyword: str,
     """
     try:
         platforms = json.loads(platforms_json)
-        return await _search_all_platforms(browser.search, keyword, platforms, per_platform_limit)
+        result = await _search_all_platforms(browser.search, keyword, platforms, per_platform_limit)
+        return compact_search_report(result) if compact else result
     except (ValueError, TypeError) as e:
         return {"status": "invalid_input", "reason": str(e)[:320]}
 
@@ -179,7 +180,9 @@ async def research_purchase(keyword: str, budget_yuan: float | None = None,
 
     Inspect one eligible detail per platform BEFORE ranking, then up to three shortlisted
     details and two review sections. Cached details are reused within this request.
-    Compact output is the default to avoid client overflow; compact=False retains all evidence.
+    Use compact=True for routine client shopping research to avoid output overflow.
+    compact=False is only for explicit raw-evidence export requests; large exports may
+    exceed client limits. Compact output keeps structured source fields and risk evidence.
     Optionally (inspect_reviews_top_k=0..3) inspect visible review-like DOM text
     for shortlisted product pages; absent reviews must never become a quality score.
     """
