@@ -88,3 +88,33 @@ def test_compact_search_keeps_products_once_and_preserves_unknown_price():
     assert result['per_platform'][0]['priced_product_count']==0
     assert 'products' not in result['per_platform'][0]
     assert len(report['per_platform'][0]['products'])==1
+
+
+def test_shortlist_brand_conflict_is_removed_before_backfilling():
+    async def search(platform,query,limit):
+        a=row();a['displayed_price_yuan']='20';a['url']='https://item.jd.com/1.html'
+        b=row();b['displayed_price_yuan']='30';b['url']='https://item.jd.com/2.html'
+        return {'status':'observed','products':[a,b]}
+    calls=[]
+    async def fetch(url):
+        calls.append(url);d=detail(url)
+        if url.endswith('/1.html'):d['data']['attributes']['brand']['value']='FIREMOE/火萌'
+        return d
+    result=asyncio.run(research_purchase(search,'罗技M185无线鼠标',['jd'],detail_provider=fetch,inspect_shortlist_top_k=3))
+    assert result['shortlist'][0]['url'].endswith('/2.html')
+    assert len(result['shortlist'])==1
+    assert len(calls)==2
+    assert '品牌' in result['intent_excluded'][0]['reason']
+    assert '不据此判定假货' in result['intent_excluded'][0]['reason']
+
+
+def test_shortlist_detail_budget_stays_bounded_when_conflicts_continue():
+    async def search(platform,query,limit):
+        return {'status':'observed','products':[row()|{'url':f'https://item.jd.com/{i}.html','displayed_price_yuan':str(i+10)} for i in range(1,6)]}
+    calls=[]
+    async def fetch(url):
+        calls.append(url);d=detail(url);d['data']['attributes']['brand']['value']='另一品牌';return d
+    result=asyncio.run(research_purchase(search,'罗技M185无线鼠标',['jd'],detail_provider=fetch,inspect_shortlist_top_k=2))
+    assert len(calls)==2
+    assert len(result['intent_excluded'])==2
+    assert all(not item['detail_evidence'] for item in result['shortlist'])

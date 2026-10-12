@@ -60,6 +60,8 @@ def compact_research_report(report: dict[str, Any]) -> dict[str, Any]:
         for unmatched in check.get('unmatched', []):
             unmatched.pop('title', None)
     for excluded in result.get('intent_excluded', []):
+        if isinstance(excluded.get('detail_evidence'), dict):
+            (excluded['detail_evidence'].get('data') or {}).pop('parameters', None)
         title = excluded.get('title', '')
         if len(title)>100:
             excluded['title']=title[:100]

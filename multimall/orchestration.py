@@ -100,9 +100,12 @@ async def research_purchase(provider: SearchProvider, query: str,
                             include_secondhand: bool = False, location: str = "",
                             per_platform_limit: int = 8,
                             detail_provider: Callable[[str], Awaitable[dict[str, Any]]] | None = None,
-                            inspect_details_per_platform: int = 0) -> dict[str, Any]:
+                            inspect_details_per_platform: int = 0,
+                            inspect_shortlist_top_k: int = 0) -> dict[str, Any]:
     if not 0 <= inspect_details_per_platform <= 2:
         raise ValueError("inspect_details_per_platform 必须是 0-2")
+    if not 0 <= inspect_shortlist_top_k <= 3:
+        raise ValueError("inspect_shortlist_top_k 必须是 0-3")
     discovery = await search_all_platforms(provider, query, platforms, per_platform_limit)
     candidates = discovery["products"]
     intent_excluded = []
@@ -144,6 +147,38 @@ async def research_purchase(provider: SearchProvider, query: str,
             "next_step": "检查真实登录/权限/页面变化，或由用户提供具体商品链接。",
         }
     detail_coverage = []
+
+    async def inspect(index):
+        row = candidates[index]
+        try:
+            detail = await detail_provider(row['url'])
+            if not isinstance(detail, dict):
+                raise ValueError('详情返回不是对象')
+        except Exception:
+            detail = {'status':'error', 'data':None, 'reason':'详情读取失败，未补造参数'}
+        candidates[index] = enrich_offer(row, detail)
+        detail_coverage.append({'platform':row['platform'],'url':row['url'],'status':detail.get('status'),
+                                'structured_fields':list((detail.get('data') or {}).get('attributes', {})),
+                                'merge_status':candidates[index]['detail_merge_status'],
+                                'structured_identity':candidates[index].get('structured_identity', {})})
+
+    def filter_detail_conflicts(rows):
+        eligible = []
+        for row in rows:
+            observed_models = set(re.findall(r"(?<![a-z0-9])m\d{3,4}[a-z]?(?![a-z0-9])", str(row.get('model') or '').casefold()))
+            brand = str(row.get('brand') or '').casefold()
+            reason = None
+            if requested_models and observed_models and not requested_models.intersection(observed_models):
+                reason = '详情显式型号与指定型号不一致'
+            elif row.get('detail_merge_status') == 'visible_structured_claims_only' and ('罗技' in query or 'logitech' in query.casefold()) and brand and not ('罗技' in brand or 'logitech' in brand):
+                reason = '详情展示品牌与指定罗技品牌不一致（不据此判定假货）'
+            if reason:
+                intent_excluded.append({'url':row['url'], 'title':row['title'], 'reason':reason,
+                                        'evidence_source':'visible_product_parameter','detail_evidence':row.get('detail_evidence')})
+            else:
+                eligible.append(row)
+        return eligible
+
     if detail_provider and inspect_details_per_platform:
         inspected = {}
         for i, row in enumerate(candidates):
@@ -153,31 +188,24 @@ async def research_purchase(provider: SearchProvider, query: str,
             if not recommend_products([row], budget_yuan, include_secondhand, location)['recommendations']:
                 continue
             inspected[platform] = inspected.get(platform, 0) + 1
-            try:
-                detail = await detail_provider(row['url'])
-                if not isinstance(detail, dict):
-                    raise ValueError('详情返回不是对象')
-            except Exception:
-                detail = {'status':'error', 'data':None, 'reason':'详情读取失败，未补造参数'}
-            candidates[i] = enrich_offer(row, detail)
-            detail_coverage.append({'platform':platform,'url':row['url'],'status':detail.get('status'),
-                                    'structured_fields':list((detail.get('data') or {}).get('attributes', {})),
-                                    'merge_status':candidates[i]['detail_merge_status'],
-                                    'structured_identity':candidates[i].get('structured_identity', {})})
-    if requested_models:
-        eligible = []
-        for row in candidates:
-            observed_models = set(re.findall(r"(?<![a-z0-9])m\d{3,4}[a-z]?(?![a-z0-9])", str(row.get('model') or '').casefold()))
-            if observed_models and not requested_models.intersection(observed_models):
-                intent_excluded.append({'url':row['url'], 'title':row['title'], 'reason':'详情显式型号与指定型号不一致',
-                                        'evidence_source':'visible_product_parameter', 'detail_evidence':row.get('detail_evidence')})
-            else:
-                eligible.append(row)
-        candidates = eligible
+            await inspect(i)
+    candidates = filter_detail_conflicts(candidates)
+    if detail_provider and inspect_shortlist_top_k:
+        # Re-rank after each observed conflict. The extra detail budget remains bounded.
+        for _ in range(inspect_shortlist_top_k):
+            if not candidates:
+                break
+            shortlist = recommend_products(candidates, budget_yuan, include_secondhand, location)['recommendations']
+            pending = next((offer for offer in shortlist if not offer.get('detail_evidence')), None)
+            if not pending:
+                break
+            index = next(i for i, row in enumerate(candidates) if row['url']==pending['url'])
+            await inspect(index)
+            candidates = filter_detail_conflicts(candidates)
     if not candidates:
         return {'status':'needs_more_evidence', 'discovery':discovery, 'shortlist':[],
                 'intent_excluded':intent_excluded, 'detail_coverage':detail_coverage,
-                'reason':'详情参数显示候选不符合指定型号，不能推荐。'}
+                'reason':'详情参数显示候选不符合指定身份，不能推荐。'}
     ranked = recommend_products(candidates, budget_yuan, include_secondhand, location)
     return {
         "status": "provisional_results",
