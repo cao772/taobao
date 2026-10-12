@@ -26,7 +26,7 @@ def enrich_offer(offer: dict[str, Any], detail: dict[str, Any]) -> dict[str, Any
     value = str(condition.get('value') or '')
     if value in ('全新', '全新未拆封', '未使用'):
         row['condition'] = 'new'
-    elif value in ('二手', '几乎全新', '轻微使用痕迹', '明显使用痕迹') or value in ('99新', '95新', '9成新', '8成新'):
+    elif value in ('二手', '几乎全新', '轻微使用痕迹', '明显使用痕迹') or value in ('99新', '95新', '99成新', '95成新', '9成新', '8成新'):
         row['condition'] = 'used'
     if value:
         sources['condition'] = condition

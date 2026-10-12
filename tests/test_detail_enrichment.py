@@ -118,3 +118,13 @@ def test_shortlist_detail_budget_stays_bounded_when_conflicts_continue():
     assert len(calls)==2
     assert len(result['intent_excluded'])==2
     assert all(not item['detail_evidence'] for item in result['shortlist'])
+
+
+def test_rendered_99_condition_cannot_bypass_secondhand_opt_in():
+    from multimall.intelligence import recommend_products
+    response=detail(row()['url']);response['data']['attributes']['condition']={'value':'99成新','selector':'.attribute .list .item'}
+    enriched=enrich_offer(row(),response)
+    assert enriched['condition']=='used'
+    assert enriched['evidence']['structured_fields']['condition']['value']=='99成新'
+    assert not recommend_products([enriched],include_secondhand=False)['recommendations']
+    assert recommend_products([enriched],include_secondhand=True)['recommendations']
