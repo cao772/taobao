@@ -28,13 +28,17 @@ python3 -m venv .venv
   "include_secondhand": true,
   "per_platform_limit": 5,
   "inspect_reviews_top_k": 2,
-  "inspect_details_top_k": 3
+  "inspect_details_top_k": 3,
+  "inspect_details_per_platform": 1,
+  "compact": true
 }
 ```
 
-Issue #3 的参数、SKU、评论证据及客户端迭代说明见 [本轮实现](docs/issue-3-implementation.md)。一次研究默认检查前三个候选详情、前两个评价区；显式配件/数字资源标题会从开发板推荐中剔除。
+Issue #3 的参数、SKU、评论证据及客户端迭代说明见 [本轮实现](docs/issue-3-implementation.md)。一次研究先检查每个平台 1 条符合目标和预算的候选，再分组排序；默认继续检查前三个短名单详情、前两个评价区，同次详情复用缓存；显式配件/数字资源标题会从开发板推荐中剔除。
 
 完整会话说明、可选的现有 Playwright CLI 会话复用、真实 MCP 复验脚本见 [接入说明](docs/live-integration.md)。不设置 CLI 会话变量时直接用 Python Playwright。
+
+2026-10-12 的拼多多参数、京东评价、闲鱼主商品隔离及报告大小优化见 [三平台优化](docs/optimization-2026-10-12.md)。默认返回精简报告；`compact=false` 保留完整研究证据。
 
 ## 14 个工具
 

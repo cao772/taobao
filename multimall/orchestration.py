@@ -106,7 +106,7 @@ async def research_purchase(provider: SearchProvider, query: str,
     discovery = await search_all_platforms(provider, query, platforms, per_platform_limit)
     candidates = discovery["products"]
     intent_excluded = []
-    if "开发板" in query or ("esp32" in query.casefold() and "amoled" in query.casefold()):
+    if ("开发板" in query or ("esp32" in query.casefold() and "amoled" in query.casefold())) and not re.search(r"外壳|保护壳|裸屏|表情包|软件资源", query):
         eligible = []
         for row in candidates:
             title = row["title"]
@@ -116,11 +116,11 @@ async def research_purchase(provider: SearchProvider, query: str,
             else:
                 eligible.append(row)
         candidates = eligible
-    if "鼠标" in query and "接收器" not in query:
+    if "鼠标" in query and not re.search(r"接收器|电池盖|脚贴|鼠标垫|外壳|微动开关|拆机配件", query):
         eligible = []
         for row in candidates:
             title = row["title"]
-            if re.search(r"接收器|鼠标垫|脚贴|微动开关|仅外壳", title) and not re.search(r"[含附带].{0,12}接收器|无接收器|鼠标[+＋]接收器", title):
+            if (re.search(r"接收器", title) and not re.search(r"[含附带].{0,12}接收器|无接收器|鼠标[+＋]接收器", title)) or re.search(r"鼠标垫|脚贴|微动开关|仅外壳|鼠标电池盖|鼠标外壳|拆机配件", title):
                 intent_excluded.append({"url":row["url"], "title":title, "reason":"标题指向鼠标配件；不作为整鼠推荐", "evidence_source":"visible_search_title_not_product_parameters"})
             else:
                 eligible.append(row)
@@ -162,7 +162,8 @@ async def research_purchase(provider: SearchProvider, query: str,
             candidates[i] = enrich_offer(row, detail)
             detail_coverage.append({'platform':platform,'url':row['url'],'status':detail.get('status'),
                                     'structured_fields':list((detail.get('data') or {}).get('attributes', {})),
-                                    'merge_status':candidates[i]['detail_merge_status']})
+                                    'merge_status':candidates[i]['detail_merge_status'],
+                                    'structured_identity':candidates[i].get('structured_identity', {})})
     if requested_models:
         eligible = []
         for row in candidates:

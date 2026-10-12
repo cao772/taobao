@@ -228,3 +228,20 @@ def test_mouse_receiver_word_does_not_remove_complete_or_receiver_missing_mouse(
     assert len(result['shortlist']) == 2
     assert len(result['intent_excluded']) == 1
     assert '型号' in result['intent_excluded'][0]['reason']
+
+
+def test_mouse_battery_cover_cannot_rank_as_whole_mouse():
+    async def provider(platform,query,limit):
+        return {'status':'observed','products':[offer(title='罗技m185鼠标电池盖，拆机配件',displayed_price_yuan='4'),offer(url='https://item.jd.com/124.html',title='罗技M185无线鼠标带接收器',displayed_price_yuan='40')]}
+    result=asyncio.run(research_purchase(provider,'罗技M185无线鼠标',['jd']))
+    assert len(result['intent_excluded'])==1
+    assert result['shortlist'][0]['displayed_price_yuan']=='40'
+
+
+def test_explicit_accessory_request_is_not_filtered_as_whole_device():
+    async def provider(platform,query,limit):
+        return {'status':'observed','products':[offer(title=query,displayed_price_yuan='4')]}
+    for query in ('罗技M185鼠标电池盖','ESP32-S3 AMOLED开发板外壳'):
+        result=asyncio.run(research_purchase(provider,query,['jd']))
+        assert len(result['shortlist'])==1
+        assert not result['intent_excluded']

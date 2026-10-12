@@ -58,3 +58,21 @@ def test_explicit_detail_model_can_reject_misleading_search_title():
     assert result['shortlist']==[]
     assert result['status']=='needs_more_evidence'
     assert result['intent_excluded'][0]['evidence_source']=='visible_product_parameter'
+
+
+def test_compact_report_removes_duplicates_preserving_source_and_review_counts():
+    from multimall.evidence import compact_research_report
+    import json
+    report={'discovery':{'per_platform':[{'platform':'jd','products':[row()]*20}]},'shortlist':[{'url':row()['url'],'detail_evidence':detail(row()['url']),'review_summary':{'sample_size':5,'quality_score':None,'review_evidence':[{'evidence_id':str(i),'text':'文本'+str(i),'source_url':row()['url'],'issue_topics':[] if i<4 else ['function_failure']} for i in range(5)]}}]}
+    report['shortlist'][0]['detail_evidence']['data']['parameters']=[{'text':'重复的参数原文'*30}]*20
+    result=compact_research_report(report)
+    assert result['discovery']['per_platform'][0]['product_count']==20
+    assert 'products' not in result['discovery']['per_platform'][0]
+    assert result['shortlist'][0]['detail_evidence']['data']['attributes']['model']['value']=='M185'
+    summary=result['shortlist'][0]['review_summary']
+    assert summary['sample_size']==5 and summary['review_evidence_omitted']==2
+    assert summary['review_evidence'][0]['evidence_id']=='4'
+    assert summary['review_evidence'][0]['source_url']==row()['url']
+    assert summary['quality_score'] is None
+    assert len(report['discovery']['per_platform'][0]['products'])==20
+    assert len(json.dumps(result))<len(json.dumps(report))

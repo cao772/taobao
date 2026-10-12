@@ -5,7 +5,7 @@ import json
 from typing import Any
 
 from .browser import PlatformBrowserPool
-from .evidence import enrich_offer
+from .evidence import enrich_offer, compact_research_report
 from .core import PLATFORMS, allowlisted_url, compare_offers, platform_from_url
 
 from .intelligence import (analyze_reviews as _analyze_reviews,
@@ -174,11 +174,12 @@ async def research_purchase(keyword: str, budget_yuan: float | None = None,
                             include_secondhand: bool = False,
                             location: str = "", per_platform_limit: int = 8,
                             inspect_reviews_top_k: int = 2, inspect_details_top_k: int = 3,
-                            inspect_details_per_platform: int = 1) -> dict[str, Any]:
+                            inspect_details_per_platform: int = 1, compact: bool = True) -> dict[str, Any]:
     """One-call shopping research: search -> provenance -> provisional shortlist.
 
     Inspect one eligible detail per platform BEFORE ranking, then up to three shortlisted
     details and two review sections. Cached details are reused within this request.
+    Compact output is the default to avoid client overflow; compact=False retains all evidence.
     Optionally (inspect_reviews_top_k=0..3) inspect visible review-like DOM text
     for shortlisted product pages; absent reviews must never become a quality score.
     """
@@ -218,7 +219,7 @@ async def research_purchase(keyword: str, budget_yuan: float | None = None,
             result["review_sample_size"] = samples
             result["quality"] = "limited_visible_review_evidence_not_independently_verified" if samples else "no_visible_review_evidence"
             result["risk_entries"] = [{**risk, "product_url":item["url"]} for item in result["shortlist"] for risk in item.get("review_summary", {}).get("risk_entries", [])]
-        return result
+        return compact_research_report(result) if compact else result
     except (ValueError, TypeError) as e:
         return {"status": "invalid_input", "reason": str(e)[:320]}
 
